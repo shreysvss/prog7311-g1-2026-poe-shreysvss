@@ -1,0 +1,32 @@
+@model shrey_st10438635_PROG7311.Models.Contract
+@{
+    ViewData["Title"] = "Delete Contract";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <i class="bi bi-exclamation-triangle"></i> Confirm Delete Contract
+            </div>
+            <div class="card-body">
+                <p>Delete contract: <strong>@Model.Title</strong>?</p>
+                <p class="text-muted small">Client: @Model.Client?.Name | Status: @Model.Status</p>
+                @if (Model.ServiceRequests.Any())
+                {
+                    <div class="alert alert-warning">
+                        <i class="bi bi-exclamation-circle"></i>
+                        This will also delete <strong>@Model.ServiceRequests.Count</strong> linked service request(s).
+                    </div>
+                }
+            </div>
+            <div class="card-footer d-flex gap-2">
+                <form asp-action="Delete">
+                    <input type="hidden" asp-for="Id" />
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Delete</button>
+                </form>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,156 @@
+@model shrey_st10438635_PROG7311.Models.ServiceRequestCreateViewModel
+@{
+    ViewData["Title"] = "New Service Request";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-info text-white">
+                <i class="bi bi-plus-circle"></i> New Service Request
+            </div>
+            <div class="card-body">
+
+                <!-- Currency Banner -->
+                <div class="alert alert-success d-flex align-items-center gap-2" id="rate-banner">
+                    <i class="bi bi-currency-exchange fs-4"></i>
+                    <div>
+                        <strong>Live Exchange Rate:</strong>
+                        <span id="rate-display">Loading…</span>
+                        <span class="text-muted ms-2 small" id="rate-note"></span>
+                    </div>
+                </div>
+
+                <form asp-action="Create" id="srForm">
+                    <div asp-validation-summary="All" class="alert alert-danger"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="ContractId" class="form-label fw-semibold">Contract (Active only)</label>
+                        <select asp-for="ContractId" class="form-select" id="contractSelect">
+                            <option value="">-- Select Active Contract --</option>
+                            @foreach (var c in Model.ActiveContracts ?? new())
+                            {
+                                <option value="@c.Id" selected="@(Model.ContractId == c.Id ? "selected" : null)">
+                                    @c.Title — @c.Client?.Name (@c.ServiceLevel)
+                                </option>
+                            }
+                        </select>
+                        <span asp-validation-for="ContractId" class="text-danger small"></span>
+                        @if (!(Model.ActiveContracts?.Any() ?? false))
+                        {
+                            <div class="alert alert-warning mt-2 small">
+                                <i class="bi bi-exclamation-circle"></i>
+                                No active contracts available. <a asp-controller="Contracts" asp-action="Index">Manage contracts</a>.
+                            </div>
+                        }
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Description" class="form-label fw-semibold"></label>
+                        <textarea asp-for="Description" class="form-control" rows="3"
+                                  placeholder="Describe the logistics service request…"></textarea>
+                        <span asp-validation-for="Description" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Currency Conversion Block -->
+                    <div class="card bg-light border-0 p-3 mb-3">
+                        <h6 class="fw-bold mb-3"><i class="bi bi-calculator"></i> Cost &amp; Currency Conversion</h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <label asp-for="CostUSD" class="form-label fw-semibold">Amount (USD $)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">$</span>
+                                    <input asp-for="CostUSD" class="form-control" id="costUSD"
+                                           type="number" step="0.01" min="0.01"
+                                           placeholder="e.g. 1500.00" />
+                                </div>
+                                <span asp-validation-for="CostUSD" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Exchange Rate</label>
+                                <div class="input-group">
+                                    <span class="input-group-text"><i class="bi bi-arrow-left-right"></i></span>
+                                    <input id="exchangeRateDisplay" class="form-control" type="text" readonly />
+                                </div>
+                                <div class="form-text">Auto-fetched from API</div>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label fw-semibold">Converted (ZAR R)</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">R</span>
+                                    <input id="estZARDisplay" class="form-control" type="text" readonly />
+                                </div>
+                                <div class="form-text">Auto-calculated</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Hidden fields that actually POST to the controller -->
+                    <input type="hidden" name="ExchangeRate" id="exchangeRateHidden" value="0" />
+                    <input type="hidden" name="EstimatedZAR" id="estZARHidden" value="0" />
+
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-info text-white">
+                            <i class="bi bi-send"></i> Submit Request
+                        </button>
+                        <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        let currentRate = 0;
+
+        function recalculate() {
+            const usd = parseFloat(document.getElementById('costUSD').value) || 0;
+            if (usd > 0 && currentRate > 0) {
+                const zar = (usd * currentRate).toFixed(2);
+                document.getElementById('estZARDisplay').value = 'R ' + zar;
+                document.getElementById('estZARHidden').value = zar;
+            } else {
+                document.getElementById('estZARDisplay').value = '';
+                document.getElementById('estZARHidden').value = '0';
+            }
+        }
+
+        async function loadRate() {
+            try {
+                const resp = await fetch('/ServiceRequests/GetRate');
+                const data = await resp.json();
+                currentRate = parseFloat(data.rate);
+                document.getElementById('exchangeRateDisplay').value = currentRate.toFixed(4);
+                document.getElementById('exchangeRateHidden').value = currentRate.toFixed(4);
+                document.getElementById('rate-display').textContent = `1 USD = R ${currentRate.toFixed(4)} ZAR`;
+                document.getElementById('rate-note').textContent = '(live)';
+                recalculate();
+            } catch (err) {
+                currentRate = 18.50;
+                document.getElementById('exchangeRateDisplay').value = '18.5000';
+                document.getElementById('exchangeRateHidden').value = '18.5000';
+                document.getElementById('rate-display').textContent = '1 USD = R 18.5000 ZAR';
+                document.getElementById('rate-note').textContent = '(fallback rate)';
+                document.getElementById('rate-banner').classList.replace('alert-success', 'alert-warning');
+                recalculate();
+            }
+        }
+
+        document.getElementById('costUSD').addEventListener('input', recalculate);
+
+        // Force update hidden fields just before form submits
+        document.getElementById('srForm').addEventListener('submit', function () {
+            const usd = parseFloat(document.getElementById('costUSD').value) || 0;
+            const zar = (usd * currentRate).toFixed(2);
+            document.getElementById('estZARHidden').value = zar;
+            document.getElementById('exchangeRateHidden').value = currentRate.toFixed(4);
+        });
+
+        loadRate();
+    </script>
+}

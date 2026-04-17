@@ -1,0 +1,94 @@
+@model shrey_st10438635_PROG7311.Models.Contract
+@{
+    ViewData["Title"] = "Contract Details";
+    var badgeClass = Model.Status switch
+    {
+        ContractStatus.Active => "bg-success",
+        ContractStatus.Draft => "bg-secondary",
+        ContractStatus.Expired => "bg-danger",
+        ContractStatus.OnHold => "bg-warning text-dark",
+        _ => "bg-secondary"
+    };
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-9">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white d-flex justify-content-between align-items-center">
+                <span><i class="bi bi-file-earmark-text"></i> @Model.Title</span>
+                <span class="badge @badgeClass fs-6">@Model.Status</span>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <dl class="row">
+                            <dt class="col-sm-5">Client</dt>
+                            <dd class="col-sm-7">@Model.Client?.Name</dd>
+                            <dt class="col-sm-5">Service Level</dt>
+                            <dd class="col-sm-7"><span class="badge bg-info text-dark">@Model.ServiceLevel</span></dd>
+                            <dt class="col-sm-5">Start Date</dt>
+                            <dd class="col-sm-7">@Model.StartDate.ToString("dd MMM yyyy")</dd>
+                            <dt class="col-sm-5">End Date</dt>
+                            <dd class="col-sm-7">@Model.EndDate.ToString("dd MMM yyyy")</dd>
+                            <dt class="col-sm-5">Created</dt>
+                            <dd class="col-sm-7">@Model.CreatedAt.ToString("dd MMM yyyy HH:mm")</dd>
+                        </dl>
+                    </div>
+                    <div class="col-md-6">
+                        <h6 class="fw-bold">Signed Agreement</h6>
+                        @if (!string.IsNullOrEmpty(Model.SignedAgreementPath))
+                        {
+                            <div class="border rounded p-3 bg-light text-center">
+                                <i class="bi bi-file-earmark-pdf fs-1 text-danger"></i>
+                                <p class="mt-2 mb-1 small fw-semibold">@Model.SignedAgreementFileName</p>
+                                <a asp-action="Download" asp-route-id="@Model.Id" class="btn btn-sm btn-danger mt-1">
+                                    <i class="bi bi-download"></i> Download PDF
+                                </a>
+                            </div>
+                        }
+                        else
+                        {
+                            <p class="text-muted">No signed agreement uploaded.</p>
+                        }
+                    </div>
+                </div>
+
+                @if (Model.ServiceRequests.Any())
+                {
+                    <hr />
+                    <h6 class="fw-bold">Service Requests (@Model.ServiceRequests.Count)</h6>
+                    <table class="table table-sm table-bordered">
+                        <thead class="table-light">
+                            <tr><th>Description</th><th>USD</th><th>ZAR</th><th>Status</th><th>Date</th></tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var sr in Model.ServiceRequests)
+                            {
+                                <tr>
+                                    <td>@sr.Description</td>
+                                    <td>$@sr.CostUSD.ToString("N2")</td>
+                                    <td>R@sr.CostZAR.ToString("N2")</td>
+                                    <td><span class="badge bg-secondary">@sr.Status</span></td>
+                                    <td>@sr.RequestedOn.ToString("yyyy-MM-dd")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+            </div>
+            <div class="card-footer d-flex gap-2">
+                @if (Model.Status == ContractStatus.Active)
+                {
+                    <a asp-controller="ServiceRequests" asp-action="Create" asp-route-contractId="@Model.Id"
+                       class="btn btn-sm btn-success">
+                        <i class="bi bi-plus-circle"></i> Raise Service Request
+                    </a>
+                }
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-warning">
+                    <i class="bi bi-pencil"></i> Edit
+                </a>
+                <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Back</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,31 @@
+@model shrey_st10438635_PROG7311.Models.Client
+@{
+    ViewData["Title"] = "Delete Client";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <i class="bi bi-exclamation-triangle"></i> Confirm Delete
+            </div>
+            <div class="card-body">
+                <p class="mb-1">Are you sure you want to delete client <strong>@Model.Name</strong>?</p>
+                @if (Model.Contracts.Any())
+                {
+                    <div class="alert alert-warning mt-3">
+                        <i class="bi bi-exclamation-circle"></i>
+                        This client has <strong>@Model.Contracts.Count</strong> contract(s). Deleting may fail if contracts exist.
+                    </div>
+                }
+            </div>
+            <div class="card-footer d-flex gap-2">
+                <form asp-action="Delete">
+                    <input type="hidden" asp-for="Id" />
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Delete</button>
+                </form>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>

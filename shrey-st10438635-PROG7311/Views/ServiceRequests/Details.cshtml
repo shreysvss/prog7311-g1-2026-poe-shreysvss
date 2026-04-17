@@ -1,0 +1,38 @@
+@model shrey_st10438635_PROG7311.Models.ServiceRequest
+@{
+    ViewData["Title"] = "Request Details";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-dark text-white">
+                <i class="bi bi-clipboard-data"></i> Service Request #@Model.Id
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <dt class="col-sm-4">Contract</dt>
+                    <dd class="col-sm-8">@Model.Contract?.Title</dd>
+                    <dt class="col-sm-4">Client</dt>
+                    <dd class="col-sm-8">@Model.Contract?.Client?.Name</dd>
+                    <dt class="col-sm-4">Description</dt>
+                    <dd class="col-sm-8">@Model.Description</dd>
+                    <dt class="col-sm-4">Cost (USD)</dt>
+                    <dd class="col-sm-8 text-success fw-bold">$@Model.CostUSD.ToString("N2")</dd>
+                    <dt class="col-sm-4">Exchange Rate</dt>
+                    <dd class="col-sm-8">@Model.ExchangeRateUsed.ToString("F4")</dd>
+                    <dt class="col-sm-4">Cost (ZAR)</dt>
+                    <dd class="col-sm-8 text-primary fw-bold">R @Model.CostZAR.ToString("N2")</dd>
+                    <dt class="col-sm-4">Status</dt>
+                    <dd class="col-sm-8"><span class="badge bg-warning text-dark">@Model.Status</span></dd>
+                    <dt class="col-sm-4">Requested On</dt>
+                    <dd class="col-sm-8">@Model.RequestedOn.ToString("dd MMM yyyy HH:mm")</dd>
+                </dl>
+            </div>
+            <div class="card-footer d-flex gap-2">
+                <a asp-action="Edit" asp-route-id="@Model.Id" class="btn btn-sm btn-warning"><i class="bi bi-pencil"></i> Edit</a>
+                <a asp-action="Index" class="btn btn-sm btn-outline-secondary">Back</a>
+            </div>
+        </div>
+    </div>
+</div>

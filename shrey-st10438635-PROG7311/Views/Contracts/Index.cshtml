@@ -1,0 +1,124 @@
+@model shrey_st10438635_PROG7311.Models.ContractFilterViewModel
+@{
+    ViewData["Title"] = "Contracts";
+}
+
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h2><i class="bi bi-file-earmark-text text-success"></i> Contracts</h2>
+    <a asp-action="Create" class="btn btn-success">
+        <i class="bi bi-file-earmark-plus"></i> New Contract
+    </a>
+</div>
+
+<!-- Filter Panel -->
+<div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-light fw-semibold">
+        <i class="bi bi-funnel"></i> Search &amp; Filter
+    </div>
+    <div class="card-body">
+        <form asp-action="Index" method="get">
+            <div class="row g-3 align-items-end">
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Start Date From</label>
+                    <input type="date" name="startDateFrom" class="form-control"
+                           value="@(Model.StartDateFrom?.ToString("yyyy-MM-dd"))" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Start Date To</label>
+                    <input type="date" name="startDateTo" class="form-control"
+                           value="@(Model.StartDateTo?.ToString("yyyy-MM-dd"))" />
+                </div>
+                <div class="col-md-3">
+                    <label class="form-label small fw-semibold">Status</label>
+                    <select name="status" class="form-select">
+                        <option value="">-- All Statuses --</option>
+                        @foreach (var s in Enum.GetValues<ContractStatus>())
+                        {
+                            <option value="@s" selected="@(Model.Status == s ? "selected" : null)">@s</option>
+                        }
+                    </select>
+                </div>
+                <div class="col-md-3 d-flex gap-2">
+                    <button type="submit" class="btn btn-primary flex-fill">
+                        <i class="bi bi-search"></i> Filter
+                    </button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="bi bi-x-circle"></i>
+                    </a>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Contracts Table -->
+<div class="card border-0 shadow-sm">
+    <div class="card-body p-0">
+        <table class="table table-hover mb-0">
+            <thead class="table-dark">
+                <tr>
+                    <th>Title</th>
+                    <th>Client</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Status</th>
+                    <th>Service Level</th>
+                    <th>PDF</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var c in Model.Contracts)
+                {
+                    <tr>
+                        <td class="fw-semibold">@c.Title</td>
+                        <td>@c.Client?.Name</td>
+                        <td>@c.StartDate.ToString("yyyy-MM-dd")</td>
+                        <td>@c.EndDate.ToString("yyyy-MM-dd")</td>
+                        <td>
+                            @{
+                                var badgeClass = c.Status switch
+                                {
+                                    ContractStatus.Active => "bg-success",
+                                    ContractStatus.Draft => "bg-secondary",
+                                    ContractStatus.Expired => "bg-danger",
+                                    ContractStatus.OnHold => "bg-warning text-dark",
+                                    _ => "bg-secondary"
+                                };
+                            }
+                            <span class="badge @badgeClass">@c.Status</span>
+                        </td>
+                        <td><span class="badge bg-info text-dark">@c.ServiceLevel</span></td>
+                        <td>
+                            @if (!string.IsNullOrEmpty(c.SignedAgreementPath))
+                            {
+                                <a asp-action="Download" asp-route-id="@c.Id"
+                                   class="btn btn-sm btn-outline-danger" title="@c.SignedAgreementFileName">
+                                    <i class="bi bi-file-earmark-pdf"></i> PDF
+                                </a>
+                            }
+                            else
+                            {
+                                <span class="text-muted small">None</span>
+                            }
+                        </td>
+                        <td class="text-end">
+                            <a asp-action="Details" asp-route-id="@c.Id" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
+                            <a asp-action="Edit" asp-route-id="@c.Id" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
+                            <a asp-action="Delete" asp-route-id="@c.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                        </td>
+                    </tr>
+                }
+                @if (!Model.Contracts.Any())
+                {
+                    <tr>
+                        <td colspan="8" class="text-center text-muted py-4">No contracts found. <a asp-action="Create">Create one.</a></td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    </div>
+    <div class="card-footer text-muted small">
+        Showing @Model.Contracts.Count contract(s)
+    </div>
+</div>

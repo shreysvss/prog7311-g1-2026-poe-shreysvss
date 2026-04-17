@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - GLMS</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="~/css/site.css" />
+    <style>
+        *, *::before, *::after {
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'DM Sans', sans-serif;
+            background-color: #E8F4FD;
+            background-image: radial-gradient(circle at 20% 20%, rgba(42, 171, 223, 0.08) 0%, transparent 50%), radial-gradient(circle at 80% 80%, rgba(10, 22, 40, 0.04) 0%, transparent 50%);
+            min-height: 100vh;
+            color: #1a2535;
+        }
+
+        .glms-nav {
+            background-color: #0A1628;
+            border-bottom: 1px solid rgba(42, 171, 223, 0.2);
+            padding: 0 1.5rem;
+            height: 62px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+            .glms-nav .nav-inner {
+                display: flex;
+                align-items: center;
+                width: 100%;
+                gap: 2rem;
+            }
+
+        .glms-brand {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            text-decoration: none;
+            flex-shrink: 0;
+        }
+
+        .glms-brand-icon {
+            width: 34px;
+            height: 34px;
+            background: linear-gradient(135deg, #2AABDF, #1a7aab);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: white;
+        }
+
+        .glms-brand-text {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 1.2rem;
+            color: #ffffff;
+            letter-spacing: 0.5px;
+        }
+
+            .glms-brand-text span {
+                color: #2AABDF;
+            }
+
+        .glms-nav-links {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            flex: 1;
+        }
+
+            .glms-nav-links a {
+                color: rgba(255,255,255,0.65);
+                text-decoration: none;
+                font-size: 0.875rem;
+                font-weight: 500;
+                padding: 6px 12px;
+                border-radius: 7px;
+                border: 1px solid transparent;
+                transition: all 0.2s ease;
+                display: flex;
+                align-items: center;
+                gap: 6px;
+                white-space: nowrap;
+            }
+
+                .glms-nav-links a:hover {
+                    color: #ffffff;
+                    background: rgba(42, 171, 223, 0.08);
+                    border-color: rgba(42, 171, 223, 0.35);
+                    box-shadow: 0 0 10px rgba(42, 171, 223, 0.2);
+                }
+
+                .glms-nav-links a.active {
+                    color: #2AABDF;
+                    background: rgba(42, 171, 223, 0.12);
+                    border-color: rgba(42, 171, 223, 0.45);
+                    box-shadow: 0 0 12px rgba(42, 171, 223, 0.25);
+                }
+
+                .glms-nav-links a i {
+                    font-size: 14px;
+                    opacity: 0.8;
+                }
+
+        .glms-nav-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-left: auto;
+            flex-shrink: 0;
+        }
+
+        .glms-nav-badge {
+            font-size: 0.7rem;
+            font-weight: 600;
+            color: rgba(255,255,255,0.4);
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            border: 1px solid rgba(255,255,255,0.1);
+            padding: 3px 8px;
+            border-radius: 20px;
+        }
+
+        .glms-page {
+            max-width: 1300px;
+            margin: 0 auto;
+            padding: 2rem 1.5rem 4rem;
+        }
+
+        .glms-alert {
+            border-radius: 10px;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            margin-bottom: 1.25rem;
+            padding: 0.75rem 1rem;
+        }
+
+        .card {
+            border: 1px solid rgba(10, 22, 40, 0.07) !important;
+            border-radius: 12px !important;
+            background: #ffffff;
+        }
+
+        .page-heading {
+            font-family: 'Syne', sans-serif;
+            font-weight: 800;
+            font-size: 2rem;
+            color: #0A1628;
+            margin-bottom: 0.25rem;
+        }
+
+        .page-subheading {
+            color: #5a7a99;
+            font-size: 0.9rem;
+            margin-bottom: 0;
+        }
+
+        @@media (max-width: 768px) {
+            .glms-nav-badge {
+                display: none;
+            }
+
+            .glms-nav-links a span {
+                display: none;
+            }
+
+            .glms-page {
+                padding: 1.25rem 1rem 3rem;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <nav class="glms-nav">
+        <div class="nav-inner">
+            <a class="glms-brand" asp-controller="Home" asp-action="Index">
+                <div class="glms-brand-icon">
+                    <i class="bi bi-truck-front-fill"></i>
+                </div>
+                <span class="glms-brand-text">GL<span>MS</span></span>
+            </a>
+
+            <div class="glms-nav-links">
+                <a asp-controller="Home" asp-action="Index">
+                    <i class="bi bi-grid-1x2"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a asp-controller="Clients" asp-action="Index">
+                    <i class="bi bi-people"></i>
+                    <span>Clients</span>
+                </a>
+                <a asp-controller="Contracts" asp-action="Index">
+                    <i class="bi bi-file-earmark-text"></i>
+                    <span>Contracts</span>
+                </a>
+                <a asp-controller="ServiceRequests" asp-action="Index">
+                    <i class="bi bi-clipboard-check"></i>
+                    <span>Service Requests</span>
+                </a>
+            </div>
+
+            <div class="glms-nav-right">
+                <span class="glms-nav-badge">TechMove &middot; v1.0</span>
+            </div>
+        </div>
+    </nav>
+
+    <div class="glms-page">
+        @if (TempData["Success"] != null)
+        {
+            <div class="alert alert-success glms-alert alert-dismissible fade show" role="alert">
+                <i class="bi bi-check-circle-fill me-2"></i>@TempData["Success"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+        @if (TempData["Error"] != null)
+        {
+            <div class="alert alert-danger glms-alert alert-dismissible fade show" role="alert">
+                <i class="bi bi-exclamation-triangle-fill me-2"></i>@TempData["Error"]
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        }
+
+        @RenderBody()
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="~/js/site.js"></script>
+
+    <script>
+        const links = document.querySelectorAll('.glms-nav-links a');
+        links.forEach(link => {
+            if (link.href === window.location.href) {
+                link.classList.add('active');
+            }
+        });
+    </script>
+
+    @await RenderSectionAsync("Scripts", required: false)
+</body>
+</html>

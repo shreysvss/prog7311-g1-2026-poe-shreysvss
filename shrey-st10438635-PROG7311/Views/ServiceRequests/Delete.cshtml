@@ -1,0 +1,25 @@
+@model shrey_st10438635_PROG7311.Models.ServiceRequest
+@{
+    ViewData["Title"] = "Delete Service Request";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card border-danger shadow-sm">
+            <div class="card-header bg-danger text-white">
+                <i class="bi bi-exclamation-triangle"></i> Delete Service Request #@Model.Id
+            </div>
+            <div class="card-body">
+                <p>Delete this service request from contract <strong>@Model.Contract?.Title</strong>?</p>
+                <p class="text-muted">Cost: $@Model.CostUSD.ToString("N2") / R@Model.CostZAR.ToString("N2")</p>
+            </div>
+            <div class="card-footer d-flex gap-2">
+                <form asp-action="Delete">
+                    <input type="hidden" asp-for="Id" />
+                    <button type="submit" class="btn btn-danger"><i class="bi bi-trash"></i> Delete</button>
+                </form>
+                <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,12 @@
+{
+  "profiles": {
+    "shrey-st10438635-PROG7311": {
+      "commandName": "Project",
+      "launchBrowser": true,
+      "environmentVariables": {
+        "ASPNETCORE_ENVIRONMENT": "Development"
+      },
+      "applicationUrl": "https://localhost:51660;http://localhost:51661"
+    }
+  }
+}

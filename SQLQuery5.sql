@@ -1,0 +1,1 @@
+﻿SELECT Id, Title, Status FROM [dbo].[Contracts]

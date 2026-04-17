@@ -1,0 +1,50 @@
+/* GLMS Custom Styles — Shrey ST10438635 */
+
+body {
+    background-color: #f8f9fa;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+}
+
+.navbar-brand {
+    font-size: 1.3rem;
+    letter-spacing: 0.05em;
+}
+
+.card {
+    border-radius: 0.75rem;
+}
+
+.card-header {
+    border-radius: 0.75rem 0.75rem 0 0 !important;
+    font-weight: 600;
+}
+
+.table th {
+    font-size: 0.85rem;
+    letter-spacing: 0.03em;
+    text-transform: uppercase;
+}
+
+.table td {
+    vertical-align: middle;
+}
+
+.badge {
+    font-size: 0.78rem;
+    padding: 0.35em 0.65em;
+}
+
+.footer {
+    font-size: 0.85rem;
+}
+
+/* Dashboard stat cards hover */
+.card:hover {
+    transform: translateY(-2px);
+    transition: transform 0.2s ease;
+}
+
+/* Alert auto-dismiss */
+.alert {
+    border-radius: 0.5rem;
+}
