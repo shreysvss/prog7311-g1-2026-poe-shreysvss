@@ -1,42 +1,89 @@
 @model IEnumerable<shrey_st10438635_PROG7311.Models.ServiceRequest>
 @{
     ViewData["Title"] = "Service Requests";
+    // Local helper: map a currency code to its display symbol
+    string SymbolFor(string code) => code?.ToUpperInvariant() switch
+    {
+        "USD" => "$",
+        "EUR" => "€",
+        "GBP" => "£",
+        "AUD" => "A$",
+        "CAD" => "C$",
+        "JPY" => "¥",
+        _ => code ?? ""
+    };
 }
+
+<style>
+    .sr-wrapper {
+        max-width: 100%;
+    }
+
+    .sr-table {
+        width: 100%;
+        font-size: 0.9rem;
+    }
+
+        .sr-table th, .sr-table td {
+            vertical-align: middle;
+            padding: 0.6rem 0.5rem;
+        }
+
+            .sr-table td.wrap-cell {
+                white-space: normal;
+                word-wrap: break-word;
+            }
+
+            .sr-table td.nowrap, .sr-table th.nowrap {
+                white-space: nowrap;
+            }
+
+    .sr-actions {
+        white-space: nowrap;
+    }
+
+        .sr-actions .btn {
+            margin-right: 2px;
+            padding: 0.2rem 0.45rem;
+        }
+</style>
+
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h2><i class="bi bi-clipboard-check text-info"></i> Service Requests</h2>
     <a asp-action="Create" class="btn btn-info text-white">
         <i class="bi bi-plus-circle"></i> New Request
     </a>
 </div>
-<div class="card border-0 shadow-sm">
+<div class="card border-0 shadow-sm sr-wrapper">
     <div class="card-body p-0">
-        <table class="table table-hover mb-0">
+        <table class="table table-hover mb-0 sr-table">
             <thead class="table-dark">
                 <tr>
-                    <th>#</th>
+                    <th class="nowrap">#</th>
                     <th>Contract</th>
                     <th>Client</th>
                     <th>Description</th>
-                    <th>Cost (USD)</th>
-                    <th>Cost (ZAR)</th>
-                    <th>Rate</th>
-                    <th>Status</th>
-                    <th>Date</th>
-                    <th class="text-end">Actions</th>
+                    <th class="nowrap">Cost</th>
+                    <th class="nowrap">Cost (ZAR)</th>
+                    <th class="nowrap">Rate</th>
+                    <th class="nowrap">Status</th>
+                    <th class="nowrap">Date</th>
+                    <th class="nowrap text-end">Actions</th>
                 </tr>
             </thead>
             <tbody>
                 @foreach (var sr in Model)
                 {
+                    var symbol = SymbolFor(sr.SourceCurrency);
                     <tr>
-                        <td class="text-muted small">@sr.Id</td>
-                        <td class="fw-semibold">@sr.Contract?.Title</td>
-                        <td>@sr.Contract?.Client?.Name</td>
-                        <td>@(sr.Description.Length > 40 ? sr.Description[..40] + "…" : sr.Description)</td>
-                        <td class="text-success fw-semibold">@($"${sr.CostUSD.ToString("N2")}")</td>
-                        <td class="text-primary fw-semibold">@($"R{sr.CostZAR.ToString("N2")}")</td>
-                        <td class="text-muted small">@sr.ExchangeRateUsed.ToString("F4")</td>
-                        <td>
+                        <td class="text-muted small nowrap">@sr.Id</td>
+                        <td class="fw-semibold wrap-cell">@sr.Contract?.Title</td>
+                        <td class="wrap-cell">@sr.Contract?.Client?.Name</td>
+                        <td class="wrap-cell">@sr.Description</td>
+                        <td class="text-success fw-semibold nowrap">@($"{symbol}{sr.Cost.ToString("N2")}") <span class="text-muted small">@sr.SourceCurrency</span></td>
+                        <td class="text-primary fw-semibold nowrap">@($"R{sr.CostZAR.ToString("N2")}")</td>
+                        <td class="text-muted small nowrap">@sr.ExchangeRateUsed.ToString("F4")</td>
+                        <td class="nowrap">
                             @{
                                 var sc = sr.Status switch
                                 {
@@ -49,11 +96,11 @@
                             }
                             <span class="badge @sc">@sr.Status</span>
                         </td>
-                        <td class="small">@sr.RequestedOn.ToString("yyyy-MM-dd")</td>
-                        <td class="text-end">
-                            <a asp-action="Details" asp-route-id="@sr.Id" class="btn btn-sm btn-outline-info"><i class="bi bi-eye"></i></a>
-                            <a asp-action="Edit" asp-route-id="@sr.Id" class="btn btn-sm btn-outline-warning"><i class="bi bi-pencil"></i></a>
-                            <a asp-action="Delete" asp-route-id="@sr.Id" class="btn btn-sm btn-outline-danger"><i class="bi bi-trash"></i></a>
+                        <td class="small nowrap">@sr.RequestedOn.ToString("yyyy-MM-dd")</td>
+                        <td class="text-end sr-actions nowrap">
+                            <a asp-action="Details" asp-route-id="@sr.Id" class="btn btn-sm btn-outline-info" title="Details"><i class="bi bi-eye"></i></a>
+                            <a asp-action="Edit" asp-route-id="@sr.Id" class="btn btn-sm btn-outline-warning" title="Edit"><i class="bi bi-pencil"></i></a>
+                            <a asp-action="Delete" asp-route-id="@sr.Id" class="btn btn-sm btn-outline-danger" title="Delete"><i class="bi bi-trash"></i></a>
                         </td>
                     </tr>
                 }

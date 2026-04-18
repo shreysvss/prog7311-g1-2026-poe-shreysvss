@@ -1,8 +1,19 @@
 @model shrey_st10438635_PROG7311.Models.ServiceRequest
 @{
     ViewData["Title"] = "Request Details";
+    // Local helper: map a currency code to its display symbol
+    string SymbolFor(string code) => code?.ToUpperInvariant() switch
+    {
+        "USD" => "$",
+        "EUR" => "€",
+        "GBP" => "£",
+        "AUD" => "A$",
+        "CAD" => "C$",
+        "JPY" => "¥",
+        _ => code ?? ""
+    };
+    var symbol = SymbolFor(Model.SourceCurrency);
 }
-
 <div class="row justify-content-center">
     <div class="col-md-8">
         <div class="card border-0 shadow-sm">
@@ -17,12 +28,14 @@
                     <dd class="col-sm-8">@Model.Contract?.Client?.Name</dd>
                     <dt class="col-sm-4">Description</dt>
                     <dd class="col-sm-8">@Model.Description</dd>
-                    <dt class="col-sm-4">Cost (USD)</dt>
-                    <dd class="col-sm-8 text-success fw-bold">$@Model.CostUSD.ToString("N2")</dd>
+                    <dt class="col-sm-4">Source Currency</dt>
+                    <dd class="col-sm-8">@Model.SourceCurrency</dd>
+                    <dt class="col-sm-4">Cost</dt>
+                    <dd class="col-sm-8 text-success fw-bold">@($"{symbol}{Model.Cost.ToString("N2")}") @Model.SourceCurrency</dd>
                     <dt class="col-sm-4">Exchange Rate</dt>
                     <dd class="col-sm-8">@Model.ExchangeRateUsed.ToString("F4")</dd>
                     <dt class="col-sm-4">Cost (ZAR)</dt>
-                    <dd class="col-sm-8 text-primary fw-bold">R @Model.CostZAR.ToString("N2")</dd>
+                    <dd class="col-sm-8 text-primary fw-bold">@($"R{Model.CostZAR.ToString("N2")}")</dd>
                     <dt class="col-sm-4">Status</dt>
                     <dd class="col-sm-8"><span class="badge bg-warning text-dark">@Model.Status</span></dd>
                     <dt class="col-sm-4">Requested On</dt>

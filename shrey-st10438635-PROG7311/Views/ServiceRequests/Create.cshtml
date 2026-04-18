@@ -56,17 +56,27 @@
                     <div class="card bg-light border-0 p-3 mb-3">
                         <h6 class="fw-bold mb-3"><i class="bi bi-calculator"></i> Cost &amp; Currency Conversion</h6>
                         <div class="row g-3">
-                            <div class="col-md-4">
-                                <label asp-for="CostUSD" class="form-label fw-semibold">Amount (USD $)</label>
+                            <div class="col-md-3">
+                                <label asp-for="SourceCurrency" class="form-label fw-semibold">Currency</label>
+                                <select asp-for="SourceCurrency" class="form-select" id="sourceCurrency">
+                                    @foreach (var cur in Model.SupportedCurrencies)
+                                    {
+                                        <option value="@cur" selected="@(Model.SourceCurrency == cur ? "selected" : null)">@cur</option>
+                                    }
+                                </select>
+                                <span asp-validation-for="SourceCurrency" class="text-danger small"></span>
+                            </div>
+                            <div class="col-md-3">
+                                <label asp-for="CostAmount" class="form-label fw-semibold">Amount</label>
                                 <div class="input-group">
-                                    <span class="input-group-text">$</span>
-                                    <input asp-for="CostUSD" class="form-control" id="costUSD"
+                                    <span class="input-group-text" id="currencySymbol">$</span>
+                                    <input asp-for="CostAmount" class="form-control" id="costAmount"
                                            type="number" step="0.01" min="0.01"
                                            placeholder="e.g. 1500.00" />
                                 </div>
-                                <span asp-validation-for="CostUSD" class="text-danger small"></span>
+                                <span asp-validation-for="CostAmount" class="text-danger small"></span>
                             </div>
-                            <div class="col-md-4">
+                            <div class="col-md-3">
                                 <label class="form-label fw-semibold">Exchange Rate</label>
                                 <div class="input-group">
                                     <span class="input-group-text"><i class="bi bi-arrow-left-right"></i></span>
@@ -74,8 +84,8 @@
                                 </div>
                                 <div class="form-text">Auto-fetched from API</div>
                             </div>
-                            <div class="col-md-4">
-                                <label class="form-label fw-semibold">Converted (ZAR R)</label>
+                            <div class="col-md-3">
+                                <label class="form-label fw-semibold">Converted (ZAR)</label>
                                 <div class="input-group">
                                     <span class="input-group-text">R</span>
                                     <input id="estZARDisplay" class="form-control" type="text" readonly />
@@ -108,10 +118,20 @@
     <script>
         let currentRate = 0;
 
+        // Map currency codes to display symbols
+        const symbols = {
+            USD: '$', EUR: '€', GBP: '£', AUD: 'A$', CAD: 'C$', JPY: '¥'
+        };
+
+        function updateSymbol() {
+            const cur = document.getElementById('sourceCurrency').value;
+            document.getElementById('currencySymbol').textContent = symbols[cur] || cur;
+        }
+
         function recalculate() {
-            const usd = parseFloat(document.getElementById('costUSD').value) || 0;
-            if (usd > 0 && currentRate > 0) {
-                const zar = (usd * currentRate).toFixed(2);
+            const amount = parseFloat(document.getElementById('costAmount').value) || 0;
+            if (amount > 0 && currentRate > 0) {
+                const zar = (amount * currentRate).toFixed(2);
                 document.getElementById('estZARDisplay').value = 'R ' + zar;
                 document.getElementById('estZARHidden').value = zar;
             } else {
@@ -121,36 +141,49 @@
         }
 
         async function loadRate() {
+            const cur = document.getElementById('sourceCurrency').value;
             try {
-                const resp = await fetch('/ServiceRequests/GetRate');
+                const resp = await fetch('/ServiceRequests/GetRate?currency=' + encodeURIComponent(cur));
+                if (!resp.ok) throw new Error('Rate fetch failed');
                 const data = await resp.json();
                 currentRate = parseFloat(data.rate);
                 document.getElementById('exchangeRateDisplay').value = currentRate.toFixed(4);
                 document.getElementById('exchangeRateHidden').value = currentRate.toFixed(4);
-                document.getElementById('rate-display').textContent = `1 USD = R ${currentRate.toFixed(4)} ZAR`;
+                document.getElementById('rate-display').textContent = `1 ${cur} = R ${currentRate.toFixed(4)} ZAR`;
                 document.getElementById('rate-note').textContent = '(live)';
+                document.getElementById('rate-banner').classList.remove('alert-warning');
+                document.getElementById('rate-banner').classList.add('alert-success');
                 recalculate();
             } catch (err) {
-                currentRate = 18.50;
-                document.getElementById('exchangeRateDisplay').value = '18.5000';
-                document.getElementById('exchangeRateHidden').value = '18.5000';
-                document.getElementById('rate-display').textContent = '1 USD = R 18.5000 ZAR';
+                // Fallback rates, mirrors the server-side fallback dictionary
+                const fallbacks = { USD: 18.50, EUR: 20.00, GBP: 23.50, AUD: 12.00, CAD: 13.50, JPY: 0.12 };
+                currentRate = fallbacks[cur] || 18.50;
+                document.getElementById('exchangeRateDisplay').value = currentRate.toFixed(4);
+                document.getElementById('exchangeRateHidden').value = currentRate.toFixed(4);
+                document.getElementById('rate-display').textContent = `1 ${cur} = R ${currentRate.toFixed(4)} ZAR`;
                 document.getElementById('rate-note').textContent = '(fallback rate)';
-                document.getElementById('rate-banner').classList.replace('alert-success', 'alert-warning');
+                document.getElementById('rate-banner').classList.remove('alert-success');
+                document.getElementById('rate-banner').classList.add('alert-warning');
                 recalculate();
             }
         }
 
-        document.getElementById('costUSD').addEventListener('input', recalculate);
+        document.getElementById('costAmount').addEventListener('input', recalculate);
+        document.getElementById('sourceCurrency').addEventListener('change', function () {
+            updateSymbol();
+            loadRate();
+        });
 
         // Force update hidden fields just before form submits
         document.getElementById('srForm').addEventListener('submit', function () {
-            const usd = parseFloat(document.getElementById('costUSD').value) || 0;
-            const zar = (usd * currentRate).toFixed(2);
+            const amount = parseFloat(document.getElementById('costAmount').value) || 0;
+            const zar = (amount * currentRate).toFixed(2);
             document.getElementById('estZARHidden').value = zar;
             document.getElementById('exchangeRateHidden').value = currentRate.toFixed(4);
         });
 
+        // Initial load
+        updateSymbol();
         loadRate();
     </script>
 }

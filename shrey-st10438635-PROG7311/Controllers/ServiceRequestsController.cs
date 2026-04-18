@@ -47,7 +47,9 @@ namespace shrey_st10438635_PROG7311.Controllers
         // GET: ServiceRequests/Create
         public async Task<IActionResult> Create(int? contractId)
         {
-            var rate = await _currencyService.GetUsdToZarRateAsync();
+            // Default to USD on page load
+            var rate = await _currencyService.GetRateToZarAsync("USD");
+
             var activeContracts = await _context.Contracts
                 .Include(c => c.Client)
                 .Where(c => c.Status == ContractStatus.Active)
@@ -56,6 +58,8 @@ namespace shrey_st10438635_PROG7311.Controllers
             var vm = new ServiceRequestCreateViewModel
             {
                 ActiveContracts = activeContracts,
+                SupportedCurrencies = _currencyService.SupportedCurrencies.ToList(),
+                SourceCurrency = "USD",
                 ExchangeRate = rate,
                 ContractId = contractId ?? 0
             };
@@ -73,11 +77,12 @@ namespace shrey_st10438635_PROG7311.Controllers
             ModelState.Remove("ExchangeRate");
             ModelState.Remove("EstimatedZAR");
 
-            // Load active contracts for repopulating dropdown on error
+            // Repopulate dropdown data in case we return the view
             vm.ActiveContracts = await _context.Contracts
                 .Include(c => c.Client)
                 .Where(c => c.Status == ContractStatus.Active)
                 .ToListAsync();
+            vm.SupportedCurrencies = _currencyService.SupportedCurrencies.ToList();
 
             if (!ModelState.IsValid)
             {
@@ -85,7 +90,7 @@ namespace shrey_st10438635_PROG7311.Controllers
                 return View(vm);
             }
 
-            //Workflow Validation
+            // Workflow Validation
             var contract = await _context.Contracts.FindAsync(vm.ContractId);
             if (contract == null)
             {
@@ -101,15 +106,16 @@ namespace shrey_st10438635_PROG7311.Controllers
                 return View(vm);
             }
 
-            //Currency Conversion 
-            var rate = await _currencyService.GetUsdToZarRateAsync();
-            var zarAmount = _currencyService.ConvertUsdToZar(vm.CostUSD, rate);
+            // Currency Conversion (any supported source currency to ZAR)
+            var rate = await _currencyService.GetRateToZarAsync(vm.SourceCurrency);
+            var zarAmount = _currencyService.ConvertToZar(vm.CostAmount, rate);
 
             var serviceRequest = new ServiceRequest
             {
                 ContractId = vm.ContractId,
                 Description = vm.Description,
-                CostUSD = vm.CostUSD,
+                SourceCurrency = vm.SourceCurrency.ToUpperInvariant(),
+                Cost = vm.CostAmount,   // stores the original entered amount
                 CostZAR = zarAmount,
                 ExchangeRateUsed = rate,
                 Status = ServiceRequestStatus.Pending,
@@ -118,7 +124,7 @@ namespace shrey_st10438635_PROG7311.Controllers
 
             _context.ServiceRequests.Add(serviceRequest);
             await _context.SaveChangesAsync();
-            TempData["Success"] = $"Service Request created. USD {vm.CostUSD:F2} = ZAR {zarAmount:F2} (rate: {rate:F4}).";
+            TempData["Success"] = $"Service Request created. {vm.SourceCurrency} {vm.CostAmount:F2} = ZAR {zarAmount:F2} (rate: {rate:F4}).";
             return RedirectToAction(nameof(Index));
         }
 
@@ -135,7 +141,7 @@ namespace shrey_st10438635_PROG7311.Controllers
         // POST: ServiceRequests/Edit/5
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> Edit(int id, [Bind("Id,ContractId,Description,CostUSD,CostZAR,ExchangeRateUsed,Status,RequestedOn")] ServiceRequest sr)
+        public async Task<IActionResult> Edit(int id, [Bind("Id,ContractId,Description,SourceCurrency,Cost,CostZAR,ExchangeRateUsed,Status,RequestedOn")] ServiceRequest sr)
         {
             if (id != sr.Id) return NotFound();
             if (ModelState.IsValid)
@@ -173,12 +179,19 @@ namespace shrey_st10438635_PROG7311.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // AJAX: GET /ServiceRequests/GetRate — returns current USD→ZAR rate as JSON
+        // AJAX: GET /ServiceRequests/GetRate?currency=EUR — returns current rate to ZAR as JSON
         [HttpGet]
-        public async Task<IActionResult> GetRate()
+        public async Task<IActionResult> GetRate(string currency = "USD")
         {
-            var rate = await _currencyService.GetUsdToZarRateAsync();
-            return Json(new { rate });
+            try
+            {
+                var rate = await _currencyService.GetRateToZarAsync(currency);
+                return Json(new { rate, currency = currency.ToUpperInvariant() });
+            }
+            catch (ArgumentException)
+            {
+                return BadRequest(new { error = $"Currency '{currency}' not supported." });
+            }
         }
     }
 }

@@ -9,6 +9,17 @@
         ContractStatus.OnHold => "bg-warning text-dark",
         _ => "bg-secondary"
     };
+    // Local helper: map a currency code to its display symbol
+    string SymbolFor(string code) => code?.ToUpperInvariant() switch
+    {
+        "USD" => "$",
+        "EUR" => "€",
+        "GBP" => "£",
+        "AUD" => "A$",
+        "CAD" => "C$",
+        "JPY" => "¥",
+        _ => code ?? ""
+    };
 }
 
 <div class="row justify-content-center">
@@ -59,15 +70,16 @@
                     <h6 class="fw-bold">Service Requests (@Model.ServiceRequests.Count)</h6>
                     <table class="table table-sm table-bordered">
                         <thead class="table-light">
-                            <tr><th>Description</th><th>USD</th><th>ZAR</th><th>Status</th><th>Date</th></tr>
+                            <tr><th>Description</th><th>Cost</th><th>ZAR</th><th>Status</th><th>Date</th></tr>
                         </thead>
                         <tbody>
                             @foreach (var sr in Model.ServiceRequests)
                             {
+                                var symbol = SymbolFor(sr.SourceCurrency);
                                 <tr>
                                     <td>@sr.Description</td>
-                                    <td>$@sr.CostUSD.ToString("N2")</td>
-                                    <td>R@sr.CostZAR.ToString("N2")</td>
+                                    <td>@($"{symbol}{sr.Cost.ToString("N2")}") <span class="text-muted small">@sr.SourceCurrency</span></td>
+                                    <td>@($"R{sr.CostZAR.ToString("N2")}")</td>
                                     <td><span class="badge bg-secondary">@sr.Status</span></td>
                                     <td>@sr.RequestedOn.ToString("yyyy-MM-dd")</td>
                                 </tr>

@@ -1,8 +1,18 @@
 @model shrey_st10438635_PROG7311.Models.ServiceRequest
 @{
     ViewData["Title"] = "Delete Service Request";
+    string SymbolFor(string code) => code?.ToUpperInvariant() switch
+    {
+        "USD" => "$",
+        "EUR" => "€",
+        "GBP" => "£",
+        "AUD" => "A$",
+        "CAD" => "C$",
+        "JPY" => "¥",
+        _ => code ?? ""
+    };
+    var symbol = SymbolFor(Model.SourceCurrency);
 }
-
 <div class="row justify-content-center">
     <div class="col-md-6">
         <div class="card border-danger shadow-sm">
@@ -11,7 +21,7 @@
             </div>
             <div class="card-body">
                 <p>Delete this service request from contract <strong>@Model.Contract?.Title</strong>?</p>
-                <p class="text-muted">Cost: $@Model.CostUSD.ToString("N2") / R@Model.CostZAR.ToString("N2")</p>
+                <p class="text-muted">Cost: @($"{symbol}{Model.Cost.ToString("N2")}") @Model.SourceCurrency / @($"R{Model.CostZAR.ToString("N2")}")</p>
             </div>
             <div class="card-footer d-flex gap-2">
                 <form asp-action="Delete">
