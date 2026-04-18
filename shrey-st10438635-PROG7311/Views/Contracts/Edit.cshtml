@@ -10,7 +10,7 @@
                 <i class="bi bi-pencil"></i> Edit Contract — @Model.Title
             </div>
             <div class="card-body">
-                <form asp-action="Edit" enctype="multipart/form-data">
+                <form asp-action="Edit" enctype="multipart/form-data" id="contractForm">
                     <input type="hidden" asp-for="Id" />
                     <input type="hidden" asp-for="SignedAgreementPath" />
                     <input type="hidden" asp-for="SignedAgreementFileName" />
@@ -54,13 +54,17 @@
                                     <a asp-action="Download" asp-route-id="@Model.Id" class="ms-2">(Download)</a>
                                 </div>
                             }
-                            <input type="file" name="signedAgreement" class="form-control" accept=".pdf" />
-                            <div class="form-text">Leave blank to keep current file.</div>
+                            <input type="file" name="signedAgreement" id="signedAgreement" class="form-control" accept=".pdf" />
+                            <div class="form-text">
+                                <i class="bi bi-info-circle"></i>
+                                Maximum file size: <strong>5 MB</strong>. Only PDF files are allowed. Leave blank to keep current file.
+                            </div>
+                            <div id="fileSizeError" class="text-danger small mt-1" style="display:none;"></div>
                         </div>
                     </div>
 
                     <div class="d-flex gap-2 mt-4">
-                        <button type="submit" class="btn btn-warning"><i class="bi bi-save"></i> Update Contract</button>
+                        <button type="submit" class="btn btn-warning" id="submitBtn"><i class="bi bi-save"></i> Update Contract</button>
                         <a asp-action="Index" class="btn btn-outline-secondary">Cancel</a>
                     </div>
                 </form>
@@ -70,5 +74,33 @@
 </div>
 
 @section Scripts {
-    @{ await Html.RenderPartialAsync("_ValidationScriptsPartial"); }
+    @{
+        await Html.RenderPartialAsync("_ValidationScriptsPartial");
+    }
+    <script>
+        const MAX_FILE_SIZE_MB = 5;
+        const MAX_FILE_SIZE_BYTES = MAX_FILE_SIZE_MB * 1024 * 1024;
+
+        const fileInput = document.getElementById('signedAgreement');
+        const errorBox = document.getElementById('fileSizeError');
+        const submitBtn = document.getElementById('submitBtn');
+
+        fileInput.addEventListener('change', function () {
+            errorBox.style.display = 'none';
+            errorBox.textContent = '';
+            submitBtn.disabled = false;
+
+            if (this.files.length === 0) return;
+
+            const file = this.files[0];
+            const fileSizeMB = (file.size / (1024 * 1024)).toFixed(2);
+
+            if (file.size > MAX_FILE_SIZE_BYTES) {
+                errorBox.textContent = `File is ${fileSizeMB} MB — maximum allowed is ${MAX_FILE_SIZE_MB} MB. Please choose a smaller file.`;
+                errorBox.style.display = 'block';
+                submitBtn.disabled = true;
+                this.value = '';
+            }
+        });
+    </script>
 }
