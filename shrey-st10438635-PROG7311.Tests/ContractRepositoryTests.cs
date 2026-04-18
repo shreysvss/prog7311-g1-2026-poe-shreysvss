@@ -81,9 +81,10 @@ namespace shrey_st10438635_PROG7311_Tests
         [Fact]
         public async Task FilterAsync_ByDateRange_ReturnsCorrectContracts()
         {
-            // Only contracts starting in 2024 or later
+            // Only contracts starting on/after 2024-01-01 (excludes "Expired 2023" which starts 2023-01-01)
             var results = await _repo.FilterAsync(new DateTime(2024, 1, 1), null, null);
-            Assert.Equal(3, results.Count); // all three start >= 2024-01-01 except expired 2023
+            Assert.Equal(2, results.Count); // "Active 2024" + "Draft 2025"
+            Assert.DoesNotContain(results, c => c.Title == "Expired 2023");
         }
 
         [Fact]
@@ -105,9 +106,13 @@ namespace shrey_st10438635_PROG7311_Tests
         {
             var newContract = new Contract
             {
-                ClientId = 10, Title = "New Test", StartDate = DateTime.Today,
-                EndDate = DateTime.Today.AddYears(1), Status = ContractStatus.Draft,
-                ServiceLevel = ServiceLevel.Standard, CreatedAt = DateTime.Now
+                ClientId = 10,
+                Title = "New Test",
+                StartDate = DateTime.Today,
+                EndDate = DateTime.Today.AddYears(1),
+                Status = ContractStatus.Draft,
+                ServiceLevel = ServiceLevel.Standard,
+                CreatedAt = DateTime.Now
             };
 
             await _repo.AddAsync(newContract);

@@ -8,7 +8,7 @@ using Xunit;
 namespace shrey_st10438635_PROG7311_Tests
 {
     /// <summary>
-    /// Unit tests for FileService — verifies PDF-only validation.
+    /// Unit tests for FileService — verifies PDF-only validation and maximum file size rule.
     /// Rubric: "File Validation: Verify that uploading a restricted file type (e.g., .exe) throws an error (only .pdf allowed)."
     /// </summary>
     public class FileServiceTests
@@ -24,10 +24,9 @@ namespace shrey_st10438635_PROG7311_Tests
         }
 
         //Helper 
-        private static IFormFile MakeFakeFile(string fileName, string contentType, int sizeBytes = 1024)
+        private static IFormFile MakeFakeFile(string fileName, string contentType, long sizeBytes = 1024)
         {
-            var content = new byte[sizeBytes];
-            var stream = new MemoryStream(content);
+            var stream = new MemoryStream();
             var mock = new Mock<IFormFile>();
             mock.Setup(f => f.FileName).Returns(fileName);
             mock.Setup(f => f.ContentType).Returns(contentType);
@@ -172,6 +171,69 @@ namespace shrey_st10438635_PROG7311_Tests
             // Act & Assert
             await Assert.ThrowsAsync<InvalidOperationException>(
                 () => _fileService.SaveContractFileAsync(file));
+        }
+
+        // Maximum File Size Tests
+
+        [Fact]
+        public void IsWithinSizeLimit_FileUnderLimit_ReturnsTrue()
+        {
+            // Arrange — 1 MB file (well under 5 MB limit)
+            var file = MakeFakeFile("contract.pdf", "application/pdf", sizeBytes: 1 * 1024 * 1024);
+
+            // Act
+            bool result = _fileService.IsWithinSizeLimit(file);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void IsWithinSizeLimit_FileAtExactLimit_ReturnsTrue()
+        {
+            // Arrange — exactly 5 MB (boundary case, should be allowed)
+            var file = MakeFakeFile("contract.pdf", "application/pdf", sizeBytes: FileService.MaxFileSizeBytes);
+
+            // Act
+            bool result = _fileService.IsWithinSizeLimit(file);
+
+            // Assert
+            Assert.True(result);
+        }
+
+        [Fact]
+        public void IsWithinSizeLimit_FileOverLimit_ReturnsFalse()
+        {
+            // Arrange — 6 MB file (over 5 MB limit)
+            var file = MakeFakeFile("contract.pdf", "application/pdf", sizeBytes: 6 * 1024 * 1024);
+
+            // Act
+            bool result = _fileService.IsWithinSizeLimit(file);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public void IsWithinSizeLimit_NullFile_ReturnsFalse()
+        {
+            // Act
+            bool result = _fileService.IsWithinSizeLimit(null!);
+
+            // Assert
+            Assert.False(result);
+        }
+
+        [Fact]
+        public async Task SaveContractFileAsync_FileOverSizeLimit_ThrowsInvalidOperationException()
+        {
+            // Arrange — valid PDF but oversized (10 MB)
+            var file = MakeFakeFile("huge_contract.pdf", "application/pdf", sizeBytes: 10 * 1024 * 1024);
+
+            // Act & Assert
+            var ex = await Assert.ThrowsAsync<InvalidOperationException>(
+                () => _fileService.SaveContractFileAsync(file));
+            Assert.Contains("maximum size", ex.Message);
         }
     }
 }

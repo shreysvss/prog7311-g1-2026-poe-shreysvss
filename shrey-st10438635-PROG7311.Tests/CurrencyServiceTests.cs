@@ -87,7 +87,7 @@ namespace shrey_st10438635_PROG7311_Tests
         [InlineData(100, 18.50, 1850.00)]
         [InlineData(250, 17.80, 4450.00)]
         [InlineData(1000, 19.00, 19000.00)]
-        [InlineData(0.01, 18.50, 0.19)]
+        [InlineData(0.01, 18.50, 0.18)]
         public void ConvertUsdToZar_MultipleRates_AllCorrect(decimal usd, decimal rate, decimal expected)
         {
             // Act

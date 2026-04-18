@@ -82,6 +82,12 @@ namespace shrey_st10438635_PROG7311.Controllers
                         ViewBag.Clients = new SelectList(_context.Clients.ToList(), "Id", "Name", contract.ClientId);
                         return View(contract);
                     }
+                    if (!_fileService.IsWithinSizeLimit(signedAgreement))
+                    {
+                        ModelState.AddModelError("signedAgreement", $"The Signed Agreement must be {FileService.MaxFileSizeBytes / (1024 * 1024)} MB or smaller.");
+                        ViewBag.Clients = new SelectList(_context.Clients.ToList(), "Id", "Name", contract.ClientId);
+                        return View(contract);
+                    }
                     var (path, fileName) = await _fileService.SaveContractFileAsync(signedAgreement);
                     contract.SignedAgreementPath = path;
                     contract.SignedAgreementFileName = fileName;
@@ -122,6 +128,12 @@ namespace shrey_st10438635_PROG7311.Controllers
                     if (!_fileService.IsValidPdf(signedAgreement))
                     {
                         ModelState.AddModelError("signedAgreement", "Only PDF files are allowed.");
+                        ViewBag.Clients = new SelectList(_context.Clients.ToList(), "Id", "Name", contract.ClientId);
+                        return View(contract);
+                    }
+                    if (!_fileService.IsWithinSizeLimit(signedAgreement))
+                    {
+                        ModelState.AddModelError("signedAgreement", $"The Signed Agreement must be {FileService.MaxFileSizeBytes / (1024 * 1024)} MB or smaller.");
                         ViewBag.Clients = new SelectList(_context.Clients.ToList(), "Id", "Name", contract.ClientId);
                         return View(contract);
                     }
