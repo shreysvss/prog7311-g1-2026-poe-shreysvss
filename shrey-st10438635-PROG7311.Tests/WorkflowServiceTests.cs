@@ -2,6 +2,15 @@ using shrey_st10438635_PROG7311.Models;
 using shrey_st10438635_PROG7311.Services;
 using Xunit;
 
+// Shrey Singh
+// ST10438635
+// References:
+// <Perumal, N., 2026. PROG7311 POE Part Two Workshop. [lecture] The Independent Institute of Education, 15 April 2026.>
+// <xUnit.net, 2026. Getting Started with xUnit.net. [online] Available at: https://xunit.net/docs/getting-started/netcore/cmdline [Accessed 15 April 2026].>
+// <Code Maze, 2026. Mocking in Unit Tests with Moq. [online] Available at: https://code-maze.com/moq-tutorial [Accessed 16 April 2026].>
+// <GeeksforGeeks, 2026. Unit Testing in C# using xUnit. [online] Available at: https://www.geeksforgeeks.org/unit-testing-in-c-sharp [Accessed 17 April 2026].>
+// <Tutorials Teacher, 2026. EF Core InMemory Database Provider for Testing. [online] Available at: https://www.tutorialsteacher.com/core/ef-core-testing [Accessed 18 April 2026].>
+
 namespace shrey_st10438635_PROG7311_Tests
 {
     /// <summary>

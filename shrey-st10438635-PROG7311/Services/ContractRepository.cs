@@ -2,9 +2,18 @@ using Microsoft.EntityFrameworkCore;
 using shrey_st10438635_PROG7311.Data;
 using shrey_st10438635_PROG7311.Models;
 
+// Shrey Singh
+// ST10438635
+// References:
+// <Perumal, N., 2026. PROG7311 POE Part Two Workshop. [lecture] The Independent Institute of Education, 15 April 2026.>
+// <Code Maze, 2026. Repository Pattern with ASP.NET Core and Entity Framework. [online] Available at: https://code-maze.com/the-repository-pattern-aspnet-core [Accessed 15 April 2026].>
+// <Refactoring Guru, 2026. Strategy Design Pattern. [online] Available at: https://refactoring.guru/design-patterns/strategy [Accessed 16 April 2026].>
+// <Tutorials Teacher, 2026. Consuming a Web API using HttpClient. [online] Available at: https://www.tutorialsteacher.com/core/consume-web-api-httpclient [Accessed 17 April 2026].>
+// <GeeksforGeeks, 2026. async and await in C#. [online] Available at: https://www.geeksforgeeks.org/async-and-await-in-c-sharp [Accessed 18 April 2026].>
+
 namespace shrey_st10438635_PROG7311.Services
 {
-    // ─── Repository Pattern (GoF / architectural pattern) ────────────────────────
+    // Repository Pattern (GoF / architectural pattern) 
     public interface IContractRepository
     {
         Task<List<Contract>> GetAllAsync();
