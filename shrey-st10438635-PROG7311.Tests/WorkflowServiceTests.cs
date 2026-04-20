@@ -33,7 +33,7 @@ namespace shrey_st10438635_PROG7311_Tests
                 ServiceLevel = ServiceLevel.Standard
             };
 
-        // Active Contract — should ALLOW 
+        // Active Contract — should ALLOW  (GeeksforGeeks, 2026)
 
         [Fact]
         public void CanCreateServiceRequest_ActiveContract_ReturnsTrue()

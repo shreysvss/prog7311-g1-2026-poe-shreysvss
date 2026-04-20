@@ -23,7 +23,9 @@ namespace shrey_st10438635_PROG7311.Services
         // Only PDF is allowed
         private static readonly string[] AllowedExtensions = { ".pdf" };
         private static readonly string[] AllowedMimeTypes = { "application/pdf" };
-        // Maximum file size: 5 MB (5 * 1024 * 1024 bytes)
+
+        // Maximum file size: 5 MB (5 * 1024 * 1024 bytes)(GeeksforGeeks, 2026)
+
         public const long MaxFileSizeBytes = 5 * 1024 * 1024;
         public FileService(IWebHostEnvironment env, ILogger<FileService> logger)
         {

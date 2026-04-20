@@ -15,7 +15,7 @@ using Xunit;
 
 namespace shrey_st10438635_PROG7311_Tests
 {
-    /// <summary>
+    /// <summary> (GeeksforGeeks, 2026)
     /// Unit tests for ContractRepository using EF Core InMemory database.
     /// Tests LINQ filtering logic for the Admin search feature.
     /// </summary>

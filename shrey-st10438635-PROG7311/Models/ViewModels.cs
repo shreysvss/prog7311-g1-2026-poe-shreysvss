@@ -23,7 +23,7 @@ namespace shrey_st10438635_PROG7311.Models
         public ContractStatus? Status { get; set; }
         public List<Contract> Contracts { get; set; } = new List<Contract>();
     }
-    // Used for ServiceRequest creation — includes currency info
+    // Used for ServiceRequest creation — includes currency info (W3Schools, 2026)
     public class ServiceRequestCreateViewModel
     {
         [Required]

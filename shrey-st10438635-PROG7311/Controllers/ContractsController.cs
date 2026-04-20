@@ -33,7 +33,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             _context = context;
         }
 
-        // GET: Contracts (with optional search/filter)
+        // GET: Contracts (with optional search/filter) (W3Schools, 2026)
         public async Task<IActionResult> Index(DateTime? startDateFrom, DateTime? startDateTo, ContractStatus? status)
         {
             List<Contract> contracts;
@@ -74,7 +74,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             return View();
         }
 
-        // POST: Contracts/Create
+        // POST: Contracts/Create  (Tutorials Teacher, 2026)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ClientId,Title,StartDate,EndDate,Status,ServiceLevel")] Contract contract,
@@ -82,7 +82,7 @@ namespace shrey_st10438635_PROG7311.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Handle PDF upload
+                // Handle PDF upload  (W3Schools, 2026)
                 if (signedAgreement != null && signedAgreement.Length > 0)
                 {
                     if (!_fileService.IsValidPdf(signedAgreement))

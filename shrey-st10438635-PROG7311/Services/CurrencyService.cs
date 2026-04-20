@@ -10,7 +10,7 @@ namespace shrey_st10438635_PROG7311.Services
 // <GeeksforGeeks, 2026. async and await in C#. [online] Available at: https://www.geeksforgeeks.org/async-and-await-in-c-sharp [Accessed 18 April 2026].>
 
 {
-    // Interface (Strategy / Dependency Inversion)
+    // Interface (Strategy / Dependency Inversion) (Code Maze, 2026)
     public interface ICurrencyService
     {
         Task<decimal> GetUsdToZarRateAsync();
@@ -40,7 +40,7 @@ namespace shrey_st10438635_PROG7311.Services
             { "JPY", 0.12m }
         };
 
-        // Simple in-memory cache per currency, to avoid hammering the free API
+        // Simple in-memory cache per currency, to avoid hammering the free API  (GeeksforGeeks, 2026)
         private readonly Dictionary<string, (decimal rate, DateTime time)> _cache = new();
         private const int CacheMinutes = 30;
 

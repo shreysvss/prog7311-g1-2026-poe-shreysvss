@@ -13,7 +13,7 @@ using shrey_st10438635_PROG7311.Models;
 
 namespace shrey_st10438635_PROG7311.Services
 {
-    // Repository Pattern (GoF / architectural pattern) 
+    // Repository Pattern (GoF / architectural pattern) (Code Maze, 2026)
     public interface IContractRepository
     {
         Task<List<Contract>> GetAllAsync();
@@ -43,7 +43,8 @@ namespace shrey_st10438635_PROG7311.Services
 
         public async Task<List<Contract>> FilterAsync(DateTime? startFrom, DateTime? startTo, ContractStatus? status)
         {
-            // LINQ filtering
+            // LINQ filtering (GeeksforGeeks, 2026)
+
             var query = _context.Contracts.Include(c => c.Client).AsQueryable();
 
             if (startFrom.HasValue)

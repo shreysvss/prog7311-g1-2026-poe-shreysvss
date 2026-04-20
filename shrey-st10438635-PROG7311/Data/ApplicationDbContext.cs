@@ -10,7 +10,7 @@ using shrey_st10438635_PROG7311.Models;
 // <W3Schools, 2026. SQL FOREIGN KEY Constraint. [online] W3Schools. Available at: https://www.w3schools.com/sql/sql_foreignkey.asp [Accessed 17 April 2026].>
 // <TutorialsTeacher, 2026. Data Annotations in EF Core. [online] Available at: https://www.tutorialsteacher.com/efcore/fluent-api-vs-data-annotation-attributes [Accessed 18 April 2026].>
 
-namespace shrey_st10438635_PROG7311.Data
+namespace shrey_st10438635_PROG7311.Data //(W3Schools, 2026)
 {
     public class ApplicationDbContext : DbContext
     {

@@ -31,7 +31,8 @@ namespace shrey_st10438635_PROG7311.Controllers
             var clients = await _context.Clients.Include(c => c.Contracts).ToListAsync();
             return View(clients);
         }
-        // GET: Clients/Details/5
+        // GET: Clients/Details/5 (Microsoft, 2026)
+        
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -39,7 +40,8 @@ namespace shrey_st10438635_PROG7311.Controllers
             if (client == null) return NotFound();
             return View(client);
         }
-        // GET: Clients/Create
+        // GET: Clients/Create (W3Schools, 2026)
+        
         public IActionResult Create() => View();
         // POST: Clients/Create
         [HttpPost]
@@ -55,7 +57,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             }
             return View(client);
         }
-        // GET: Clients/Edit/5
+        // GET: Clients/Edit/5 (Tutorials Teacher, 2026)
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();

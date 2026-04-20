@@ -31,7 +31,7 @@ namespace shrey_st10438635_PROG7311_Tests
             _service = new CurrencyService(mockFactory.Object, mockLogger.Object, mockConfig.Object);
         }
 
-        // Happy Path Tests 
+        // Happy Path Tests (GeeksforGeeks, 2026)
 
         [Fact]
         public void ConvertUsdToZar_CorrectMath_ReturnsExpected()

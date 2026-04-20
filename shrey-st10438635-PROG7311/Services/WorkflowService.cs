@@ -11,7 +11,7 @@ using shrey_st10438635_PROG7311.Models;
 
 namespace shrey_st10438635_PROG7311.Services
 {
-    // Strategy Pattern: Workflow validation separated from controllers
+    // Strategy Pattern: Workflow validation separated from controllers (Code Maze, 2026)
     public interface IWorkflowService
     {
         (bool isValid, string errorMessage) CanCreateServiceRequest(Contract contract);

@@ -58,7 +58,8 @@ namespace shrey_st10438635_PROG7311.Models
         [Display(Name = "Service Level")]
         public ServiceLevel ServiceLevel { get; set; } = ServiceLevel.Standard;
 
-        // PDF file path stored on disk
+        // PDF file path stored on disk (W3Schools, 2026)
+
         [Display(Name = "Signed Agreement (PDF)")]
         public string? SignedAgreementPath { get; set; }
 

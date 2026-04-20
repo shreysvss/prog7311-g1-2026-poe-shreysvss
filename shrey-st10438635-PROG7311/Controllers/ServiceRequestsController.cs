@@ -31,7 +31,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             _workflowService = workflowService;
         }
 
-        // GET: ServiceRequests
+        // GET: ServiceRequests  (W3Schools, 2026)
         public async Task<IActionResult> Index()
         {
             var requests = await _context.ServiceRequests
@@ -77,7 +77,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             return View(vm);
         }
 
-        // POST: ServiceRequests/Create
+        // POST: ServiceRequests/Create  (Tutorials Teacher, 2026)
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ServiceRequestCreateViewModel vm)
