@@ -1,15 +1,20 @@
+//Code attribution
+//Title: Data Annotations in EF Core
+//Author: Tutorials Teacher
+//Date: 18 April 2026
+//Version: 1
+//Availability: https://www.tutorialsteacher.com/efcore/fluent-api-vs-data-annotation-attributes
+
+//Code attribution
+//Anthropic. 2026. Claude (Version 4.5) [Large language model].
+//Used to help clean up and refine code, not to generate it.
+//Available at: https://claude.ai
+//[Accessed: 20 April 2026].
+
+
 using System.ComponentModel.DataAnnotations;
 
-// Shrey Singh
-// ST10438635
-// References:
-// <Perumal, N., 2026. PROG7311 POE Part Two Workshop. [lecture] The Independent Institute of Education, 15 April 2026.>
-// <Microsoft, 2026. Entity Framework Core Overview. [online] Microsoft Learn. Available at: https://learn.microsoft.com/en-us/ef/core [Accessed 15 April 2026].>
-// <Entity Framework Tutorial, 2026. Code-First Approach in EF Core. [online] Available at: https://www.entityframeworktutorial.net/efcore/create-model-for-existing-database-in-ef-core.aspx [Accessed 16 April 2026].>
-// <W3Schools, 2026. SQL FOREIGN KEY Constraint. [online] W3Schools. Available at: https://www.w3schools.com/sql/sql_foreignkey.asp [Accessed 17 April 2026].>
-// <TutorialsTeacher, 2026. Data Annotations in EF Core. [online] Available at: https://www.tutorialsteacher.com/efcore/fluent-api-vs-data-annotation-attributes [Accessed 18 April 2026].>
-
-namespace shrey_st10438635_PROG7311.Models //(W3Schools, 2026)
+namespace shrey_st10438635_PROG7311.Models
 {
     public class Client
     {
@@ -34,7 +39,7 @@ namespace shrey_st10438635_PROG7311.Models //(W3Schools, 2026)
         [StringLength(100)]
         public string Region { get; set; } = string.Empty;
 
-        // Navigation
+        // A client can have many contracts
         public ICollection<Contract> Contracts { get; set; } = new List<Contract>();
     }
 }

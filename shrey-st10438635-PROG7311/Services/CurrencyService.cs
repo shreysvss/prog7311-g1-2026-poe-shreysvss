@@ -1,16 +1,20 @@
+//Code attribution
+//Title: Consuming a Web API using HttpClient
+//Author: Tutorials Teacher
+//Date: 17 April 2026
+//Version: 1
+//Availability: https://www.tutorialsteacher.com/core/consume-web-api-httpclient
+
+//Code attribution
+//Anthropic. 2026. Claude (Version 4.5) [Large language model].
+//Used to help clean up and refine code, not to generate it.
+//Available at: https://claude.ai
+//[Accessed: 20 April 2026].
+
+
 namespace shrey_st10438635_PROG7311.Services
-
-// Shrey Singh
-// ST10438635
-// References:
-// <Perumal, N., 2026. PROG7311 POE Part Two Workshop. [lecture] The Independent Institute of Education, 15 April 2026.>
-// <Code Maze, 2026. Repository Pattern with ASP.NET Core and Entity Framework. [online] Available at: https://code-maze.com/the-repository-pattern-aspnet-core [Accessed 15 April 2026].>
-// <Refactoring Guru, 2026. Strategy Design Pattern. [online] Available at: https://refactoring.guru/design-patterns/strategy [Accessed 16 April 2026].>
-// <Tutorials Teacher, 2026. Consuming a Web API using HttpClient. [online] Available at: https://www.tutorialsteacher.com/core/consume-web-api-httpclient [Accessed 17 April 2026].>
-// <GeeksforGeeks, 2026. async and await in C#. [online] Available at: https://www.geeksforgeeks.org/async-and-await-in-c-sharp [Accessed 18 April 2026].>
-
 {
-    // Interface (Strategy / Dependency Inversion) (Code Maze, 2026)
+    // The interface that defines what a currency service must be able to do
     public interface ICurrencyService
     {
         Task<decimal> GetUsdToZarRateAsync();
@@ -20,16 +24,17 @@ namespace shrey_st10438635_PROG7311.Services
         IReadOnlyList<string> SupportedCurrencies { get; }
     }
 
+    // Fetches live exchange rates from an external API and converts amounts to ZAR
     public class CurrencyService : ICurrencyService
     {
         private readonly IHttpClientFactory _httpClientFactory;
         private readonly ILogger<CurrencyService> _logger;
         private readonly IConfiguration _configuration;
 
-        // Supported source currencies — dropdown in the UI mirrors this list
+        // The list of currencies the app accepts — the dropdown in the UI uses this list
         private static readonly string[] _supportedCurrencies = { "USD", "EUR", "GBP", "AUD", "CAD", "JPY" };
 
-        // Fallback rates if API is unavailable (rough approximations to ZAR)
+        // Rough fallback rates in case the external API is down, so the feature never fully breaks
         private static readonly Dictionary<string, decimal> _fallbackRates = new()
         {
             { "USD", 18.50m },
@@ -40,7 +45,7 @@ namespace shrey_st10438635_PROG7311.Services
             { "JPY", 0.12m }
         };
 
-        // Simple in-memory cache per currency, to avoid hammering the free API  (GeeksforGeeks, 2026)
+        // Stores the last fetched rate per currency so we don't hit the free API on every page load
         private readonly Dictionary<string, (decimal rate, DateTime time)> _cache = new();
         private const int CacheMinutes = 30;
 
@@ -55,9 +60,10 @@ namespace shrey_st10438635_PROG7311.Services
 
         public IReadOnlyList<string> SupportedCurrencies => _supportedCurrencies;
 
-        // Kept for backwards compatibility with existing tests
+        // Kept around so the original USD-only unit tests still work
         public async Task<decimal> GetUsdToZarRateAsync() => await GetRateToZarAsync("USD");
 
+        // Fetches the live exchange rate from the given source currency into ZAR
         public async Task<decimal> GetRateToZarAsync(string sourceCurrency)
         {
             if (string.IsNullOrWhiteSpace(sourceCurrency))
@@ -68,7 +74,7 @@ namespace shrey_st10438635_PROG7311.Services
             if (!_supportedCurrencies.Contains(sourceCurrency))
                 throw new ArgumentException($"Currency '{sourceCurrency}' is not supported.", nameof(sourceCurrency));
 
-            // Return cached rate if still valid
+            // If we already have a recent cached rate for this currency, use it
             if (_cache.TryGetValue(sourceCurrency, out var cached)
                 && cached.rate > 0
                 && (DateTime.UtcNow - cached.time).TotalMinutes < CacheMinutes)
@@ -80,28 +86,32 @@ namespace shrey_st10438635_PROG7311.Services
             {
                 var client = _httpClientFactory.CreateClient("CurrencyClient");
 
-                // open.er-api.com returns all rates against the base currency
+                // Ask the API for the latest rates, using our source currency as the base
                 var response = await client.GetAsync($"https://open.er-api.com/v6/latest/{sourceCurrency}");
                 response.EnsureSuccessStatusCode();
 
+                // Parse the JSON response and pull out the ZAR rate
                 var json = await response.Content.ReadAsStringAsync();
                 using var doc = System.Text.Json.JsonDocument.Parse(json);
                 var rates = doc.RootElement.GetProperty("rates");
                 var zarRate = rates.GetProperty("ZAR").GetDecimal();
 
+                // Save the rate in the cache for next time
                 _cache[sourceCurrency] = (zarRate, DateTime.UtcNow);
                 return zarRate;
             }
             catch (Exception ex)
             {
+                // If anything goes wrong, log it and fall back to the default rate
                 _logger.LogError(ex, "Failed to fetch {Currency}->ZAR rate. Using fallback.", sourceCurrency);
                 return _fallbackRates[sourceCurrency];
             }
         }
 
-        // Kept for backwards compatibility with existing tests
+        // Kept around so the original USD-only unit tests still work
         public decimal ConvertUsdToZar(decimal usdAmount, decimal rate) => ConvertToZar(usdAmount, rate);
 
+        // Multiplies the amount by the rate and rounds to 2 decimal places
         public decimal ConvertToZar(decimal amount, decimal rate)
         {
             if (rate <= 0) throw new ArgumentException("Exchange rate must be greater than zero.", nameof(rate));

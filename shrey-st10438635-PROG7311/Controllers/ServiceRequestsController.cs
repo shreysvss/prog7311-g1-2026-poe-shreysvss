@@ -1,18 +1,30 @@
+//Code attribution
+//Title: Consuming a Web API using HttpClient
+//Author: Tutorials Teacher
+//Date: 17 April 2026
+//Version: 1
+//Availability: https://www.tutorialsteacher.com/core/consume-web-api-httpclient
+
+//Code attribution
+//Title: Model Binding in ASP.NET Core MVC
+//Author: Tutorials Teacher
+//Date: 17 April 2026
+//Version: 1
+//Availability: https://www.tutorialsteacher.com/core/aspnet-core-mvc-model-binding
+
+//Code attribution
+//Anthropic. 2026. Claude (Version 4.5) [Large language model].
+//Used to help clean up and refine code, not to generate it.
+//Available at: https://claude.ai
+//[Accessed: 20 April 2026].
+
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using shrey_st10438635_PROG7311.Data;
 using shrey_st10438635_PROG7311.Models;
 using shrey_st10438635_PROG7311.Services;
-
-// Shrey Singh
-// ST10438635
-// References:
-// <Perumal, N., 2026. PROG7311 POE Part Two Workshop. [lecture] The Independent Institute of Education, 15 April 2026.>
-// <Microsoft, 2026. Overview of ASP.NET Core MVC. [online] Microsoft Learn. Available at: https://learn.microsoft.com/en-us/aspnet/core/mvc/overview [Accessed 15 April 2026].>
-// <W3Schools, 2026. ASP.NET MVC Tutorial. [online] W3Schools. Available at: https://www.w3schools.com/asp/mvc_intro.asp [Accessed 16 April 2026].>
-// <Tutorials Teacher, 2026. Model Binding in ASP.NET Core MVC. [online] Available at: https://www.tutorialsteacher.com/core/aspnet-core-mvc-model-binding [Accessed 17 April 2026].>
-// <Code Maze, 2026. File Upload in ASP.NET Core MVC. [online] Available at: https://code-maze.com/file-upload-aspnetcore-mvc [Accessed 18 April 2026].>
 
 namespace shrey_st10438635_PROG7311.Controllers
 {
@@ -31,7 +43,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             _workflowService = workflowService;
         }
 
-        // GET: ServiceRequests  (W3Schools, 2026)
+        // Show the full list of service requests with newest first
         public async Task<IActionResult> Index()
         {
             var requests = await _context.ServiceRequests
@@ -42,7 +54,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             return View(requests);
         }
 
-        // GET: ServiceRequests/Details/5
+        // Show the details of a single service request by ID
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -53,12 +65,13 @@ namespace shrey_st10438635_PROG7311.Controllers
             return View(request);
         }
 
-        // GET: ServiceRequests/Create
+        // Show the form for creating a new service request
         public async Task<IActionResult> Create(int? contractId)
         {
-            // Default to USD on page load
+            // Load the page with USD as the default currency
             var rate = await _currencyService.GetRateToZarAsync("USD");
 
+            // Only show active contracts in the dropdown
             var activeContracts = await _context.Contracts
                 .Include(c => c.Client)
                 .Where(c => c.Status == ContractStatus.Active)
@@ -77,16 +90,16 @@ namespace shrey_st10438635_PROG7311.Controllers
             return View(vm);
         }
 
-        // POST: ServiceRequests/Create  (Tutorials Teacher, 2026)
+        // Save a new service request when the form is submitted
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create(ServiceRequestCreateViewModel vm)
         {
-            // Remove auto-calculated fields from validation — they are set by JavaScript
+            // These fields are filled in by JavaScript, so skip their server validation
             ModelState.Remove("ExchangeRate");
             ModelState.Remove("EstimatedZAR");
 
-            // Repopulate dropdown data in case we return the view
+            // Reload the dropdown data in case we end up returning the form with errors
             vm.ActiveContracts = await _context.Contracts
                 .Include(c => c.Client)
                 .Where(c => c.Status == ContractStatus.Active)
@@ -99,7 +112,7 @@ namespace shrey_st10438635_PROG7311.Controllers
                 return View(vm);
             }
 
-            // Workflow Validation
+            // Check that the selected contract actually exists
             var contract = await _context.Contracts.FindAsync(vm.ContractId);
             if (contract == null)
             {
@@ -107,6 +120,7 @@ namespace shrey_st10438635_PROG7311.Controllers
                 return View(vm);
             }
 
+            // Check the workflow rules to see if a service request can be raised on this contract
             var (canCreate, errorMsg) = _workflowService.CanCreateServiceRequest(contract);
             if (!canCreate)
             {
@@ -115,7 +129,7 @@ namespace shrey_st10438635_PROG7311.Controllers
                 return View(vm);
             }
 
-            // Currency Conversion (any supported source currency to ZAR)
+            // Get the live rate for the chosen currency and convert the cost to ZAR
             var rate = await _currencyService.GetRateToZarAsync(vm.SourceCurrency);
             var zarAmount = _currencyService.ConvertToZar(vm.CostAmount, rate);
 
@@ -124,7 +138,7 @@ namespace shrey_st10438635_PROG7311.Controllers
                 ContractId = vm.ContractId,
                 Description = vm.Description,
                 SourceCurrency = vm.SourceCurrency.ToUpperInvariant(),
-                Cost = vm.CostAmount,   // stores the original entered amount
+                Cost = vm.CostAmount,
                 CostZAR = zarAmount,
                 ExchangeRateUsed = rate,
                 Status = ServiceRequestStatus.Pending,
@@ -137,7 +151,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: ServiceRequests/Edit/5
+        // Show the form for editing an existing service request
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -147,7 +161,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             return View(sr);
         }
 
-        // POST: ServiceRequests/Edit/5
+        // Save the updated service request when the form is submitted
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,ContractId,Description,SourceCurrency,Cost,CostZAR,ExchangeRateUsed,Status,RequestedOn")] ServiceRequest sr)
@@ -164,7 +178,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             return View(sr);
         }
 
-        // GET: ServiceRequests/Delete/5
+        // Show the delete confirmation page for a service request
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -173,7 +187,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             return View(sr);
         }
 
-        // POST: ServiceRequests/Delete/5
+        // Delete the service request from the database once confirmed
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -188,7 +202,8 @@ namespace shrey_st10438635_PROG7311.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // AJAX: GET /ServiceRequests/GetRate?currency=EUR — returns current rate to ZAR as JSON
+        // Returns the live exchange rate for a given currency as JSON
+        // This is called from the browser by JavaScript when the user changes the currency dropdown
         [HttpGet]
         public async Task<IActionResult> GetRate(string currency = "USD")
         {

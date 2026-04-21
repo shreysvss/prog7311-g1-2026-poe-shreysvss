@@ -1,17 +1,29 @@
+//Code attribution
+//Title: Upload files in ASP.NET Core
+//Author: Microsoft
+//Date: 15 April 2026
+//Version: 1
+//Availability: https://learn.microsoft.com/en-us/aspnet/core/mvc/models/file-uploads
+
+//Code attribution
+//Title: File Upload in ASP.NET Core MVC
+//Author: Code Maze
+//Date: 18 April 2026
+//Version: 1
+//Availability: https://code-maze.com/file-upload-aspnetcore-mvc
+
+//Code attribution
+//Anthropic. 2026. Claude (Version 4.5) [Large language model].
+//Used to help clean up and refine code, not to generate it.
+//Available at: https://claude.ai
+//[Accessed: 20 April 2026].
+
+
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using shrey_st10438635_PROG7311.Data;
 using shrey_st10438635_PROG7311.Models;
 using shrey_st10438635_PROG7311.Services;
-
-// Shrey Singh
-// ST10438635
-// References:
-// <Perumal, N., 2026. PROG7311 POE Part Two Workshop. [lecture] The Independent Institute of Education, 15 April 2026.>
-// <Microsoft, 2026. Overview of ASP.NET Core MVC. [online] Microsoft Learn. Available at: https://learn.microsoft.com/en-us/aspnet/core/mvc/overview [Accessed 15 April 2026].>
-// <W3Schools, 2026. ASP.NET MVC Tutorial. [online] W3Schools. Available at: https://www.w3schools.com/asp/mvc_intro.asp [Accessed 16 April 2026].>
-// <Tutorials Teacher, 2026. Model Binding in ASP.NET Core MVC. [online] Available at: https://www.tutorialsteacher.com/core/aspnet-core-mvc-model-binding [Accessed 17 April 2026].>
-// <Code Maze, 2026. File Upload in ASP.NET Core MVC. [online] Available at: https://code-maze.com/file-upload-aspnetcore-mvc [Accessed 18 April 2026].>
 
 namespace shrey_st10438635_PROG7311.Controllers
 {
@@ -33,17 +45,18 @@ namespace shrey_st10438635_PROG7311.Controllers
             _context = context;
         }
 
-        // GET: Contracts (with optional search/filter) (W3Schools, 2026)
+        // Show the list of all contracts, with optional filters for date range and status
         public async Task<IActionResult> Index(DateTime? startDateFrom, DateTime? startDateTo, ContractStatus? status)
         {
             List<Contract> contracts;
 
+            // If any filter is set, run the filtered query, otherwise get them all
             if (startDateFrom.HasValue || startDateTo.HasValue || status.HasValue)
                 contracts = await _contractRepo.FilterAsync(startDateFrom, startDateTo, status);
             else
                 contracts = await _contractRepo.GetAllAsync();
 
-            // Auto-expire contracts that have passed end date
+            // Move any Active contracts past their end date into Expired status
             _workflowService.AutoExpireContracts(contracts);
             await _contractRepo.SaveAsync();
 
@@ -58,7 +71,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             return View(vm);
         }
 
-        // GET: Contracts/Details/5
+        // Show the details of a single contract by ID
         public async Task<IActionResult> Details(int? id)
         {
             if (id == null) return NotFound();
@@ -67,14 +80,14 @@ namespace shrey_st10438635_PROG7311.Controllers
             return View(contract);
         }
 
-        // GET: Contracts/Create
+        // Show the form for creating a new contract
         public IActionResult Create()
         {
             ViewBag.Clients = new SelectList(_context.Clients.ToList(), "Id", "Name");
             return View();
         }
 
-        // POST: Contracts/Create  (Tutorials Teacher, 2026)
+        // Save a new contract to the database when the form is submitted
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Create([Bind("ClientId,Title,StartDate,EndDate,Status,ServiceLevel")] Contract contract,
@@ -82,21 +95,26 @@ namespace shrey_st10438635_PROG7311.Controllers
         {
             if (ModelState.IsValid)
             {
-                // Handle PDF upload  (W3Schools, 2026)
+                // Handle the signed agreement PDF upload if one was provided
                 if (signedAgreement != null && signedAgreement.Length > 0)
                 {
+                    // Check that the file is actually a PDF
                     if (!_fileService.IsValidPdf(signedAgreement))
                     {
                         ModelState.AddModelError("signedAgreement", "Only PDF files are allowed for the Signed Agreement.");
                         ViewBag.Clients = new SelectList(_context.Clients.ToList(), "Id", "Name", contract.ClientId);
                         return View(contract);
                     }
+
+                    // Check that the file is not larger than the size limit
                     if (!_fileService.IsWithinSizeLimit(signedAgreement))
                     {
                         ModelState.AddModelError("signedAgreement", $"The Signed Agreement must be {FileService.MaxFileSizeBytes / (1024 * 1024)} MB or smaller.");
                         ViewBag.Clients = new SelectList(_context.Clients.ToList(), "Id", "Name", contract.ClientId);
                         return View(contract);
                     }
+
+                    // Save the file to disk and store the path in the contract
                     var (path, fileName) = await _fileService.SaveContractFileAsync(signedAgreement);
                     contract.SignedAgreementPath = path;
                     contract.SignedAgreementFileName = fileName;
@@ -112,7 +130,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             return View(contract);
         }
 
-        // GET: Contracts/Edit/5
+        // Show the form for editing an existing contract
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null) return NotFound();
@@ -122,7 +140,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             return View(contract);
         }
 
-        // POST: Contracts/Edit/5
+        // Save the updated contract to the database when the form is submitted
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Edit(int id, [Bind("Id,ClientId,Title,StartDate,EndDate,Status,ServiceLevel,SignedAgreementPath,SignedAgreementFileName,CreatedAt")] Contract contract,
@@ -132,21 +150,26 @@ namespace shrey_st10438635_PROG7311.Controllers
 
             if (ModelState.IsValid)
             {
+                // Handle a new PDF upload if the user picked one
                 if (signedAgreement != null && signedAgreement.Length > 0)
                 {
+                    // Check that the file is a PDF
                     if (!_fileService.IsValidPdf(signedAgreement))
                     {
                         ModelState.AddModelError("signedAgreement", "Only PDF files are allowed.");
                         ViewBag.Clients = new SelectList(_context.Clients.ToList(), "Id", "Name", contract.ClientId);
                         return View(contract);
                     }
+
+                    // Check that the file is within the size limit
                     if (!_fileService.IsWithinSizeLimit(signedAgreement))
                     {
                         ModelState.AddModelError("signedAgreement", $"The Signed Agreement must be {FileService.MaxFileSizeBytes / (1024 * 1024)} MB or smaller.");
                         ViewBag.Clients = new SelectList(_context.Clients.ToList(), "Id", "Name", contract.ClientId);
                         return View(contract);
                     }
-                    // Delete old file if exists
+
+                    // Delete the old file before saving the new one
                     if (!string.IsNullOrEmpty(contract.SignedAgreementPath))
                         _fileService.DeleteFile(contract.SignedAgreementPath);
 
@@ -164,7 +187,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             return View(contract);
         }
 
-        // GET: Contracts/Delete/5
+        // Show the delete confirmation page for a contract
         public async Task<IActionResult> Delete(int? id)
         {
             if (id == null) return NotFound();
@@ -173,7 +196,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             return View(contract);
         }
 
-        // POST: Contracts/Delete/5
+        // Delete the contract from the database once the delete is confirmed
         [HttpPost, ActionName("Delete")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteConfirmed(int id)
@@ -181,6 +204,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             var contract = await _contractRepo.GetByIdAsync(id);
             if (contract != null)
             {
+                // Also delete the uploaded PDF from disk if one exists
                 if (!string.IsNullOrEmpty(contract.SignedAgreementPath))
                     _fileService.DeleteFile(contract.SignedAgreementPath);
 
@@ -191,7 +215,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             return RedirectToAction(nameof(Index));
         }
 
-        // GET: Contracts/Download/5
+        // Let the user download the signed agreement PDF for a contract
         public async Task<IActionResult> Download(int? id)
         {
             if (id == null) return NotFound();
@@ -199,7 +223,7 @@ namespace shrey_st10438635_PROG7311.Controllers
             if (contract == null || string.IsNullOrEmpty(contract.SignedAgreementPath))
                 return NotFound();
 
-            // Serve file from wwwroot
+            // Send the user to the file URL so the browser handles the download
             return Redirect(contract.SignedAgreementPath);
         }
     }

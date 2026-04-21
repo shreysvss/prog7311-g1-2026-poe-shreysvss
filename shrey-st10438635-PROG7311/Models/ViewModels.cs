@@ -1,51 +1,69 @@
-using System.ComponentModel.DataAnnotations;
+//Code attribution
+//Title: Data Annotations in EF Core
+//Author: Tutorials Teacher
+//Date: 18 April 2026
+//Version: 1
+//Availability: https://www.tutorialsteacher.com/efcore/fluent-api-vs-data-annotation-attributes
 
-// Shrey Singh
-// ST10438635
-// References:
-// <Perumal, N., 2026. PROG7311 POE Part Two Workshop. [lecture] The Independent Institute of Education, 15 April 2026.>
-// <Microsoft, 2026. Entity Framework Core Overview. [online] Microsoft Learn. Available at: https://learn.microsoft.com/en-us/ef/core [Accessed 15 April 2026].>
-// <Entity Framework Tutorial, 2026. Code-First Approach in EF Core. [online] Available at: https://www.entityframeworktutorial.net/efcore/create-model-for-existing-database-in-ef-core.aspx [Accessed 16 April 2026].>
-// <W3Schools, 2026. SQL FOREIGN KEY Constraint. [online] W3Schools. Available at: https://www.w3schools.com/sql/sql_foreignkey.asp [Accessed 17 April 2026].>
-// <TutorialsTeacher, 2026. Data Annotations in EF Core. [online] Available at: https://www.tutorialsteacher.com/efcore/fluent-api-vs-data-annotation-attributes [Accessed 18 April 2026].>
+//Code attribution
+//Anthropic. 2026. Claude (Version 4.5) [Large language model].
+//Used to help clean up and refine code, not to generate it.
+//Available at: https://claude.ai
+//[Accessed: 20 April 2026].
+
+
+using System.ComponentModel.DataAnnotations;
 
 namespace shrey_st10438635_PROG7311.Models
 {
-    // Used for Contract filter/search
+    // Used on the Contracts page for the search and filter form
     public class ContractFilterViewModel
     {
         [DataType(DataType.Date)]
         [Display(Name = "Start Date From")]
         public DateTime? StartDateFrom { get; set; }
+
         [DataType(DataType.Date)]
         [Display(Name = "Start Date To")]
         public DateTime? StartDateTo { get; set; }
+
         public ContractStatus? Status { get; set; }
+
         public List<Contract> Contracts { get; set; } = new List<Contract>();
     }
-    // Used for ServiceRequest creation — includes currency info (W3Schools, 2026)
+
+    // Used on the Service Request create form, with all the fields needed for currency conversion
     public class ServiceRequestCreateViewModel
     {
         [Required]
         [Display(Name = "Contract")]
         public int ContractId { get; set; }
+
         [Required(ErrorMessage = "Description is required.")]
         [StringLength(500)]
         public string Description { get; set; } = string.Empty;
+
         [Required]
         [Display(Name = "Source Currency")]
         public string SourceCurrency { get; set; } = "USD";
+
         [Required]
         [Display(Name = "Cost")]
         [Range(0.01, double.MaxValue, ErrorMessage = "Cost must be a positive value.")]
         public decimal CostAmount { get; set; }
-        // Filled in via JS from API call, then confirmed on submit
+
+        // Filled in by JavaScript after fetching the live rate from the API
         [Display(Name = "Exchange Rate (to ZAR)")]
         public decimal ExchangeRate { get; set; }
+
+        // Auto-calculated on the form as the user types the amount
         [Display(Name = "Estimated Cost (ZAR)")]
         public decimal EstimatedZAR { get; set; }
-        // For dropdowns
+
+        // Used to populate the contract dropdown — only active contracts show up
         public List<Contract>? ActiveContracts { get; set; }
+
+        // Used to populate the currency dropdown (USD, EUR, GBP, etc.)
         public List<string> SupportedCurrencies { get; set; } = new List<string>();
     }
 }

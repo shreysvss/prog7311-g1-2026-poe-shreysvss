@@ -1,17 +1,23 @@
+//Code attribution
+//Title: Code-First Approach in EF Core
+//Author: Entity Framework Tutorial
+//Date: 16 April 2026
+//Version: 1
+//Availability: https://www.entityframeworktutorial.net/efcore/create-model-for-existing-database-in-ef-core.aspx
+
+//Code attribution
+//Anthropic. 2026. Claude (Version 4.5) [Large language model].
+//Used to help clean up and refine code, not to generate it.
+//Available at: https://claude.ai
+//[Accessed: 20 April 2026].
+
+
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-// Shrey Singh
-// ST10438635
-// References:
-// <Perumal, N., 2026. PROG7311 POE Part Two Workshop. [lecture] The Independent Institute of Education, 15 April 2026.>
-// <Microsoft, 2026. Entity Framework Core Overview. [online] Microsoft Learn. Available at: https://learn.microsoft.com/en-us/ef/core [Accessed 15 April 2026].>
-// <Entity Framework Tutorial, 2026. Code-First Approach in EF Core. [online] Available at: https://www.entityframeworktutorial.net/efcore/create-model-for-existing-database-in-ef-core.aspx [Accessed 16 April 2026].>
-// <W3Schools, 2026. SQL FOREIGN KEY Constraint. [online] W3Schools. Available at: https://www.w3schools.com/sql/sql_foreignkey.asp [Accessed 17 April 2026].>
-// <TutorialsTeacher, 2026. Data Annotations in EF Core. [online] Available at: https://www.tutorialsteacher.com/efcore/fluent-api-vs-data-annotation-attributes [Accessed 18 April 2026].>
-
 namespace shrey_st10438635_PROG7311.Models
 {
+    // The possible statuses a contract can be in
     public enum ContractStatus
     {
         Draft,
@@ -20,6 +26,7 @@ namespace shrey_st10438635_PROG7311.Models
         OnHold
     }
 
+    // The different service levels a contract can have
     public enum ServiceLevel
     {
         Standard,
@@ -58,11 +65,11 @@ namespace shrey_st10438635_PROG7311.Models
         [Display(Name = "Service Level")]
         public ServiceLevel ServiceLevel { get; set; } = ServiceLevel.Standard;
 
-        // PDF file path stored on disk (W3Schools, 2026)
-
+        // Path to the uploaded PDF agreement on the server
         [Display(Name = "Signed Agreement (PDF)")]
         public string? SignedAgreementPath { get; set; }
 
+        // Keeps the original file name the user uploaded, for display purposes
         [Display(Name = "Original File Name")]
         public string? SignedAgreementFileName { get; set; }
 
@@ -70,8 +77,10 @@ namespace shrey_st10438635_PROG7311.Models
         [Display(Name = "Created At")]
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        // Navigation
+        // Every contract belongs to one client
         public Client? Client { get; set; }
+
+        // A contract can have many service requests linked to it
         public ICollection<ServiceRequest> ServiceRequests { get; set; } = new List<ServiceRequest>();
     }
 }

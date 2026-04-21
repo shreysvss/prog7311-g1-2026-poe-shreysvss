@@ -1,19 +1,24 @@
+//Code attribution
+//Title: Repository Pattern with ASP.NET Core and Entity Framework
+//Author: Code Maze
+//Date: 15 April 2026
+//Version: 1
+//Availability: https://code-maze.com/the-repository-pattern-aspnet-core
+
+//Code attribution
+//Anthropic. 2026. Claude (Version 4.5) [Large language model].
+//Used to help clean up and refine code, not to generate it.
+//Available at: https://claude.ai
+//[Accessed: 20 April 2026].
+
+
 using Microsoft.EntityFrameworkCore;
 using shrey_st10438635_PROG7311.Data;
 using shrey_st10438635_PROG7311.Models;
 
-// Shrey Singh
-// ST10438635
-// References:
-// <Perumal, N., 2026. PROG7311 POE Part Two Workshop. [lecture] The Independent Institute of Education, 15 April 2026.>
-// <Code Maze, 2026. Repository Pattern with ASP.NET Core and Entity Framework. [online] Available at: https://code-maze.com/the-repository-pattern-aspnet-core [Accessed 15 April 2026].>
-// <Refactoring Guru, 2026. Strategy Design Pattern. [online] Available at: https://refactoring.guru/design-patterns/strategy [Accessed 16 April 2026].>
-// <Tutorials Teacher, 2026. Consuming a Web API using HttpClient. [online] Available at: https://www.tutorialsteacher.com/core/consume-web-api-httpclient [Accessed 17 April 2026].>
-// <GeeksforGeeks, 2026. async and await in C#. [online] Available at: https://www.geeksforgeeks.org/async-and-await-in-c-sharp [Accessed 18 April 2026].>
-
 namespace shrey_st10438635_PROG7311.Services
 {
-    // Repository Pattern (GoF / architectural pattern) (Code Maze, 2026)
+    // The interface that defines what a contract repository must be able to do
     public interface IContractRepository
     {
         Task<List<Contract>> GetAllAsync();
@@ -26,6 +31,7 @@ namespace shrey_st10438635_PROG7311.Services
         Task SaveAsync();
     }
 
+    // Handles all database access for contracts so controllers never talk to the database directly
     public class ContractRepository : IContractRepository
     {
         private readonly ApplicationDbContext _context;
@@ -35,16 +41,18 @@ namespace shrey_st10438635_PROG7311.Services
             _context = context;
         }
 
+        // Return every contract with its client loaded, newest first
         public async Task<List<Contract>> GetAllAsync()
             => await _context.Contracts.Include(c => c.Client).OrderByDescending(c => c.CreatedAt).ToListAsync();
 
+        // Find a single contract by ID and load its client and service requests too
         public async Task<Contract?> GetByIdAsync(int id)
             => await _context.Contracts.Include(c => c.Client).Include(c => c.ServiceRequests).FirstOrDefaultAsync(c => c.Id == id);
 
+        // Filter contracts by date range and/or status using LINQ
+        // Only the filters the user actually provides get added to the query
         public async Task<List<Contract>> FilterAsync(DateTime? startFrom, DateTime? startTo, ContractStatus? status)
         {
-            // LINQ filtering (GeeksforGeeks, 2026)
-
             var query = _context.Contracts.Include(c => c.Client).AsQueryable();
 
             if (startFrom.HasValue)
@@ -59,21 +67,26 @@ namespace shrey_st10438635_PROG7311.Services
             return await query.OrderByDescending(c => c.CreatedAt).ToListAsync();
         }
 
+        // Return only the contracts that are currently Active
         public async Task<List<Contract>> GetActiveContractsAsync()
             => await _context.Contracts.Include(c => c.Client)
                 .Where(c => c.Status == ContractStatus.Active)
                 .ToListAsync();
 
+        // Add a new contract to the database
         public async Task AddAsync(Contract contract) => await _context.Contracts.AddAsync(contract);
 
+        // Update an existing contract in the database
         public async Task UpdateAsync(Contract contract) => _context.Contracts.Update(contract);
 
+        // Delete a contract by ID if it exists
         public async Task DeleteAsync(int id)
         {
             var contract = await _context.Contracts.FindAsync(id);
             if (contract != null) _context.Contracts.Remove(contract);
         }
 
+        // Commit all pending changes to the database
         public async Task SaveAsync() => await _context.SaveChangesAsync();
     }
 }

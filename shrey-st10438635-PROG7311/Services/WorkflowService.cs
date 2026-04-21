@@ -1,25 +1,34 @@
-using shrey_st10438635_PROG7311.Models;
+//Code attribution
+//Title: Strategy Design Pattern
+//Author: Refactoring Guru
+//Date: 16 April 2026
+//Version: 1
+//Availability: https://refactoring.guru/design-patterns/strategy
 
-// Shrey Singh
-// ST10438635
-// References:
-// <Perumal, N., 2026. PROG7311 POE Part Two Workshop. [lecture] The Independent Institute of Education, 15 April 2026.>
-// <Code Maze, 2026. Repository Pattern with ASP.NET Core and Entity Framework. [online] Available at: https://code-maze.com/the-repository-pattern-aspnet-core [Accessed 15 April 2026].>
-// <Refactoring Guru, 2026. Strategy Design Pattern. [online] Available at: https://refactoring.guru/design-patterns/strategy [Accessed 16 April 2026].>
-// <Tutorials Teacher, 2026. Consuming a Web API using HttpClient. [online] Available at: https://www.tutorialsteacher.com/core/consume-web-api-httpclient [Accessed 17 April 2026].>
-// <GeeksforGeeks, 2026. async and await in C#. [online] Available at: https://www.geeksforgeeks.org/async-and-await-in-c-sharp [Accessed 18 April 2026].>
+//Code attribution
+//Anthropic. 2026. Claude (Version 4.5) [Large language model].
+//Used to help clean up and refine code, not to generate it.
+//Available at: https://claude.ai
+//[Accessed: 20 April 2026].
+
+
+using shrey_st10438635_PROG7311.Models;
 
 namespace shrey_st10438635_PROG7311.Services
 {
-    // Strategy Pattern: Workflow validation separated from controllers (Code Maze, 2026)
+    // The interface that defines the workflow rules around service requests and contracts
     public interface IWorkflowService
     {
         (bool isValid, string errorMessage) CanCreateServiceRequest(Contract contract);
         void AutoExpireContracts(IEnumerable<Contract> contracts);
     }
 
+    // Handles the business rules that decide whether certain actions are allowed
+    // Keeps this logic out of controllers so it can be unit tested on its own
     public class WorkflowService : IWorkflowService
     {
+        // Checks whether a service request can be raised against the given contract
+        // Returns a tuple with a yes/no answer and an error message to show the user if not
         public (bool isValid, string errorMessage) CanCreateServiceRequest(Contract contract)
         {
             if (contract == null)
@@ -40,6 +49,7 @@ namespace shrey_st10438635_PROG7311.Services
             return (true, string.Empty);
         }
 
+        // Goes through a list of contracts and flips any Active ones past their end date into Expired
         public void AutoExpireContracts(IEnumerable<Contract> contracts)
         {
             foreach (var contract in contracts)
